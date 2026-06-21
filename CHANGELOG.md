@@ -8,7 +8,8 @@ Adds advisory specialist-helper orchestration:
 - `createKeywordSpecialistRouter` and `routeSpecialists` for deterministic default routing with capability-policy filtering;
 - `consultSpecialists` for running selected helpers while allowing each helper to accept, decline, or error independently;
 - `createConsultSpecialistsTool` for optional Pi tool integration;
-- `docs/specialists.md` with the intended safety model.
+- default advisory editorial helper cards and router for content quality, GEO, entity clarity, CMS structure, and safety review;
+- `docs/specialists.md` and `docs/editorial-specialists.md` with the intended safety model.
 
 ## 0.1.0
 
