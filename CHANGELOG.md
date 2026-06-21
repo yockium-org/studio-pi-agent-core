@@ -1,8 +1,18 @@
 # Changelog
 
-## 0.1.0-local
+## 0.2.0
 
-Initial extraction candidate for `@studio/pi-agent-core`.
+Adds advisory specialist-helper orchestration:
+
+- `defineSpecialistSkill` and `createSpecialistRegistry` for project-owned specialist cards;
+- `createKeywordSpecialistRouter` and `routeSpecialists` for deterministic default routing with capability-policy filtering;
+- `consultSpecialists` for running selected helpers while allowing each helper to accept, decline, or error independently;
+- `createConsultSpecialistsTool` for optional Pi tool integration;
+- `docs/specialists.md` with the intended safety model.
+
+## 0.1.0
+
+Initial remote/tagged release for `@studio/pi-agent-core`.
 
 Includes:
 
@@ -15,4 +25,4 @@ Includes:
 - provider-agnostic Telegram audio transcription pipeline contracts;
 - reusable Pi session index helpers.
 
-This version is intended for local validation before pushing a real remote/tag. Project adapters remain responsible for prompts, CMS schemas, content policy, runtime/deploy configuration, and concrete transcription providers.
+Project adapters remain responsible for prompts, CMS schemas, content policy, runtime/deploy configuration, and concrete transcription providers.
