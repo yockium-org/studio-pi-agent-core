@@ -55,5 +55,10 @@ test("package metadata exposes only the package root", async () => {
             default: "./dist/src/index.js",
         },
     });
-    assert.deepEqual(packageJson.files, ["dist", "README.md"]);
+    assert.deepEqual(packageJson.files, [
+        "dist/src",
+        "README.md",
+        "CHANGELOG.md",
+        "docs",
+    ]);
 });
