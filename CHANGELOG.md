@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0
+
+Adds phase-aware editorial workflow helpers:
+
+- `editorialWorkflowPhases` and `editorialWorkflowIntents` for shared workflow vocabulary;
+- `createEditorialWorkflowPlan` and `getEditorialWorkflowPhasePreset` for discover, plan, draft, review, polish, and prepare-mutation phase guidance;
+- `getEditorialWorkflowSpecialistIds` and `hasUnsafeEditorialWorkflowIntent` for phase specialist selection with safety-reviewer promotion on unsafe intent;
+- `createEditorialWorkflowConsultRequest`, `consultEditorialWorkflowPhase`, and `createConsultEditorialWorkflowPhaseTool` for project-owned runner integration;
+- `createEditorialWorkflowPolicy` for phase-aware helper caps while preserving hard-denied write/publish/delete/runtime capabilities;
+- `docs/editorial-workflow.md` with the intended writing/review/prepare flow.
+
 ## 0.2.0
 
 Adds advisory specialist-helper orchestration:
