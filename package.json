@@ -1,8 +1,11 @@
 {
   "name": "@studio/pi-agent-core",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yockium-org/studio-pi-agent-core.git"
+  },
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "exports": {
@@ -23,6 +26,7 @@
     "build:test": "tsc -p tsconfig.json",
     "check": "npm run typecheck && npm run test",
     "clean": "rm -rf dist",
+    "prepare": "npm run build",
     "prepack": "npm run build",
     "test": "npm run build:test && node --test dist/test/*.test.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
