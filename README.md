@@ -17,6 +17,7 @@ This package intentionally starts small. It contains project-neutral utilities t
 - `listStoredPiSessions` / `formatPiSessionList` — reusable Pi session listing helpers.
 - `extractTelegramAudioAttachment` / `downloadTelegramFile` / `transcribeTelegramAudio` / `buildTelegramAudioTranscriptPrompt` — provider-agnostic Telegram audio transcription pipeline helpers. Projects inject the concrete `AudioTranscriber` provider.
 - `defineSpecialistSkill` / `createSpecialistRegistry` / `routeSpecialists` / `consultSpecialists` / `createConsultSpecialistsTool` — advisory specialist-helper orchestration with policy-gated capabilities, router contracts, and helper self-accept/decline decisions.
+- `createEditorialSpecialistSkills` / `createEditorialSpecialistRegistry` / `createEditorialSpecialistRouter` / `createEditorialSpecialistPolicy` — default advisory editorial helper cards for content quality, GEO, entity clarity, CMS structure, and safety review.
 
 ## Adapter boundary
 
@@ -55,7 +56,7 @@ const result = await consultSpecialists(
 );
 ```
 
-See `docs/specialists.md` for the intended integration model and safety constraints.
+See `docs/specialists.md` for the intended integration model and safety constraints, and `docs/editorial-specialists.md` for the default editorial helper cards.
 
 ## Validation
 

@@ -4,13 +4,17 @@ import test from "node:test";
 
 import * as core from "../src/index.js";
 
-const expectedRuntimeExports = [
+const expectedFunctionExports = [
     "buildTelegramAudioTranscriptPrompt",
     "callPayloadMcpTool",
     "chunkTelegramMessage",
     "consultSpecialists",
     "createConsultSpecialistsTool",
     "createEditorialExtension",
+    "createEditorialSpecialistPolicy",
+    "createEditorialSpecialistRegistry",
+    "createEditorialSpecialistRouter",
+    "createEditorialSpecialistSkills",
     "createKeywordSpecialistRouter",
     "createLazyToolsetState",
     "createPayloadMcpToolCaller",
@@ -23,6 +27,7 @@ const expectedRuntimeExports = [
     "extractPiMessageText",
     "extractTelegramAudioAttachment",
     "formatPiSessionList",
+    "getEditorialSpecialistPrompt",
     "getPiSessionName",
     "getToolNamesForToolsets",
     "isSpecialistAllowedByPolicy",
@@ -38,15 +43,28 @@ const expectedRuntimeExports = [
     "validateToolParams",
 ].sort();
 
+const expectedValueExports = [
+    "deniedEditorialSpecialistCapabilities",
+    "editorialSpecialistCapabilities",
+    "editorialSpecialistIds",
+    "safeEditorialSpecialistCapabilities",
+].sort();
+
+const expectedRuntimeExports = [...expectedFunctionExports, ...expectedValueExports].sort();
+
 test("public runtime API exports stay intentional", () => {
     assert.deepEqual(Object.keys(core).sort(), expectedRuntimeExports);
 
-    for (const exportName of expectedRuntimeExports) {
+    for (const exportName of expectedFunctionExports) {
         assert.equal(
             typeof core[exportName as keyof typeof core],
             "function",
             `${exportName} should be a function export`,
         );
+    }
+
+    for (const exportName of expectedValueExports) {
+        assert(Array.isArray(core[exportName as keyof typeof core]), `${exportName} should be an array export`);
     }
 });
 

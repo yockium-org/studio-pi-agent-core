@@ -92,3 +92,20 @@ export {
     type SpecialistSelection,
     type SpecialistSkill,
 } from "./specialists/specialists.js";
+export {
+    createEditorialSpecialistPolicy,
+    createEditorialSpecialistRegistry,
+    createEditorialSpecialistRouter,
+    createEditorialSpecialistSkills,
+    deniedEditorialSpecialistCapabilities,
+    editorialSpecialistCapabilities,
+    editorialSpecialistIds,
+    getEditorialSpecialistPrompt,
+    safeEditorialSpecialistCapabilities,
+    type EditorialSpecialistCapability,
+    type EditorialSpecialistId,
+    type EditorialSpecialistMetadata,
+    type EditorialSpecialistPolicyOptions,
+    type EditorialSpecialistPrompt,
+    type EditorialSpecialistSkill,
+} from "./specialists/editorial-presets.js";

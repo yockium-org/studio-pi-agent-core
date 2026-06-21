@@ -75,6 +75,10 @@ const result = await consultSpecialists(
 );
 ```
 
+## Editorial presets
+
+For common editorial work, core also exposes default advisory cards via `createEditorialSpecialistRegistry()` and `createEditorialSpecialistPolicy()`. See `docs/editorial-specialists.md` for the included content quality, GEO, entity, CMS structure, and safety reviewer presets.
+
 ## Pi tool wrapper
 
 Use `createConsultSpecialistsTool` when a project adapter wants the main Pi agent to call specialists as a tool:
