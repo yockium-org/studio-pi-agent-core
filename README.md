@@ -61,4 +61,7 @@ See `docs/specialists.md` for the intended integration model and safety constrai
 
 ```sh
 npm run check
+npm run pack:smoke
 ```
+
+`pack:smoke` builds the package tarball, installs it into a temporary consumer project, verifies root imports, and confirms subpath imports stay blocked by the package export map.

@@ -22,13 +22,13 @@
     "docs"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
     "build:test": "tsc -p tsconfig.json",
     "check": "npm run typecheck && npm run test",
     "clean": "rm -rf dist",
+    "pack:smoke": "node scripts/pack-smoke.mjs",
     "prepare": "npm run build",
-    "prepack": "npm run build",
-    "test": "npm run build:test && node --test dist/test/*.test.js",
+    "test": "npm run clean && npm run build:test && node --test dist/test/*.test.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
