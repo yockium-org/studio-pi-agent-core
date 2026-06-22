@@ -102,3 +102,4 @@ Unsafe intent terms such as delete, approval bypass, shell, filesystem, runtime 
 - Use `review` before claiming content is ready.
 - Use `prepareMutation` before any future write/publish/apply tool.
 - Project runners may use pi-subagents, direct model calls, local functions, or a worker service, but core intentionally does not depend on any one runtime.
+- Wrap CMS bodies, Telegram messages, tool outputs, and other user/content context with `createUntrustedContentEnvelope` / `renderUntrustedContentForModel` before passing them into workflow `context` fields.

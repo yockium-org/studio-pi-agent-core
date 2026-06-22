@@ -19,12 +19,13 @@ This package intentionally starts small. It contains project-neutral utilities t
 - `defineSpecialistSkill` / `createSpecialistRegistry` / `routeSpecialists` / `consultSpecialists` / `createConsultSpecialistsTool` — advisory specialist-helper orchestration with policy-gated capabilities, router contracts, and helper self-accept/decline decisions.
 - `createEditorialSpecialistSkills` / `createEditorialSpecialistRegistry` / `createEditorialSpecialistRouter` / `createEditorialSpecialistPolicy` — default advisory editorial helper cards for content quality, GEO, entity clarity, CMS structure, and safety review.
 - `createEditorialWorkflowPlan` / `consultEditorialWorkflowPhase` / `createConsultEditorialWorkflowPhaseTool` — phase-aware editorial workflow helpers for discover, plan, draft, review, polish, and prepare-mutation flows.
+- `createUntrustedContentEnvelope` / `renderUntrustedContentForModel` / `createUntrustedContentResult` — prompt-injection-aware wrappers for CMS, Telegram, web, user, tool, and file content that must be treated as data rather than instructions.
 
 ## Adapter boundary
 
-Shared core owns mechanics: tool registration wrapper, schema guard invocation, active toolset state, generic MCP transport, safe Pi RPC argument/text helpers, Telegram formatting/audio helpers, and session-index helpers.
+Shared core owns mechanics: tool registration wrapper, schema guard invocation, active toolset state, generic MCP transport, safe Pi RPC argument/text helpers, Telegram formatting/audio helpers, session-index helpers, specialist workflow helpers, and untrusted-content rendering helpers.
 
-Project adapters own content policy: system prompt, Telegram help/image wording, CMS tool names and descriptions, TypeBox schemas, route and locale rules, block contracts, draft mapping, and concrete specialist runner implementation.
+Project adapters own content policy: system prompt, Telegram help/image wording, CMS tool names and descriptions, TypeBox schemas, route and locale rules, block contracts, draft mapping, concrete specialist runner implementation, and where untrusted content wrappers are applied.
 
 ## Specialist helpers
 
@@ -57,7 +58,7 @@ const result = await consultSpecialists(
 );
 ```
 
-See `docs/specialists.md` for the intended integration model and safety constraints, `docs/editorial-specialists.md` for the default editorial helper cards, and `docs/editorial-workflow.md` for phase-aware writing/review flows.
+See `docs/specialists.md` for the intended integration model and safety constraints, `docs/editorial-specialists.md` for the default editorial helper cards, `docs/editorial-workflow.md` for phase-aware writing/review flows, and `docs/untrusted-content.md` for prompt-injection boundary helpers.
 
 ## Validation
 

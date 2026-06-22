@@ -27,7 +27,10 @@ const expectedFunctionExports = [
     "createSafePiRpcArgs",
     "createSpecialistRegistry",
     "createTextResult",
+    "createUntrustedContentEnvelope",
+    "createUntrustedContentResult",
     "defineSpecialistSkill",
+    "detectPromptInjectionSignals",
     "downloadTelegramFile",
     "escapeTelegramHtmlText",
     "extractPiMessageText",
@@ -43,6 +46,9 @@ const expectedFunctionExports = [
     "isToolsetName",
     "listStoredPiSessions",
     "normalizeToolsets",
+    "redactSensitiveText",
+    "renderUntrustedContentForModel",
+    "renderUntrustedContentListForModel",
     "routeSpecialists",
     "sanitizeTelegramCodeTags",
     "textFromMcpResult",
@@ -59,6 +65,8 @@ const expectedValueExports = [
     "editorialSpecialistCapabilities",
     "editorialSpecialistIds",
     "safeEditorialSpecialistCapabilities",
+    "untrustedContentSources",
+    "untrustedContentTypes",
 ].sort();
 
 const expectedRuntimeExports = [...expectedFunctionExports, ...expectedValueExports].sort();

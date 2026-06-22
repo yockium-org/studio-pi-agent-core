@@ -131,3 +131,22 @@ export {
     type EditorialWorkflowPhasePreset,
     type EditorialWorkflowPlan,
 } from "./specialists/editorial-workflow.js";
+export {
+    createUntrustedContentEnvelope,
+    createUntrustedContentResult,
+    detectPromptInjectionSignals,
+    redactSensitiveText,
+    renderUntrustedContentForModel,
+    renderUntrustedContentListForModel,
+    untrustedContentSources,
+    untrustedContentTypes,
+    type CreateUntrustedContentEnvelopeOptions,
+    type PromptInjectionPattern,
+    type PromptInjectionSignal,
+    type PromptInjectionSignalKind,
+    type UntrustedContentEnvelope,
+    type UntrustedContentRenderOptions,
+    type UntrustedContentRenderResult,
+    type UntrustedContentSource,
+    type UntrustedContentType,
+} from "./security/untrusted-content.js";
