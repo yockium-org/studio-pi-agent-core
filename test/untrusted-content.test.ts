@@ -53,6 +53,21 @@ test("createUntrustedContentEnvelope stringifies content and detects prompt inje
     assert(envelope.promptInjectionSignals.some((signal) => signal.kind === "policy_bypass"));
 });
 
+test("createUntrustedContentEnvelope preserves cyclic and BigInt content markers", () => {
+    const cyclic: Record<string, unknown> = { count: 1n };
+    cyclic.self = cyclic;
+
+    const envelope = createUntrustedContentEnvelope({
+        source: "tool",
+        label: "Cyclic tool result",
+        content: cyclic,
+        contentType: "json",
+    });
+
+    assert.match(envelope.content, /"count": "1"/u);
+    assert.match(envelope.content, /"self": "\[Circular\]"/u);
+});
+
 test("renderUntrustedContentForModel marks data boundaries and quotes content", () => {
     const envelope = createUntrustedContentEnvelope({
         source: "cms",
@@ -103,6 +118,8 @@ test("renderUntrustedContentForModel handles cyclic metadata without throwing", 
 
     const rendered = renderUntrustedContentForModel(envelope);
     assert.match(rendered.text, /Metadata:/u);
+    assert.match(rendered.text, />   "count": "1",/u);
+    assert.match(rendered.text, /"\[Circular\]"/u);
 });
 
 test("renderUntrustedContentForModel redacts secrets and truncates large content", () => {

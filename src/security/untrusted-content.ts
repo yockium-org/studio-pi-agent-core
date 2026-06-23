@@ -88,8 +88,22 @@ const defaultPromptInjectionPatterns = [
 const safeStringify = (value: unknown): string => {
     if (typeof value === "string") return value;
     if (value === undefined) return "undefined";
+
+    const seen = new WeakSet<object>();
     try {
-        return JSON.stringify(value, (_key, nestedValue) => (typeof nestedValue === "bigint" ? String(nestedValue) : nestedValue), 2);
+        const serialized = JSON.stringify(
+            value,
+            (_key, nestedValue) => {
+                if (typeof nestedValue === "bigint") return String(nestedValue);
+                if (typeof nestedValue === "object" && nestedValue !== null) {
+                    if (seen.has(nestedValue)) return "[Circular]";
+                    seen.add(nestedValue);
+                }
+                return nestedValue;
+            },
+            2,
+        );
+        return serialized ?? String(value);
     } catch {
         return String(value);
     }
