@@ -122,7 +122,7 @@ const stableHash = (value: string): string => {
 const slugPart = (value: string): string => value.toLowerCase().replace(/[^a-z0-9]+/giu, "-").replace(/^-+|-+$/gu, "").slice(0, 40) || "content";
 
 const createEnvelopeId = (source: UntrustedContentSource, label: string, content: string): string =>
-    `${source}:${slugPart(label)}:${stableHash(content)}`;
+    `${source}:${slugPart(redactSensitiveText(label))}:${stableHash(redactSensitiveText(content))}`;
 
 const cloneMetadata = (metadata: Readonly<Record<string, unknown>> | undefined): Readonly<Record<string, unknown>> | undefined => {
     if (!metadata) return undefined;
@@ -183,7 +183,8 @@ const truncateContent = (content: string, maxLength: number): { content: string;
 };
 
 const sanitizeHeaderValue = (value: string, maxLength = 200): string => {
-    const sanitized = value.replace(/[\u0000-\u001f\u007f]+/gu, " ").replace(/\s+/gu, " ").trim();
+    const redacted = redactSensitiveText(value);
+    const sanitized = redacted.replace(/[\u0000-\u001f\u007f]+/gu, " ").replace(/\s+/gu, " ").trim();
     return sanitized.length > maxLength ? `${sanitized.slice(0, Math.max(0, maxLength - 1))}…` : sanitized;
 };
 
@@ -265,9 +266,9 @@ export const createUntrustedContentResult = (
     const rendered = renderUntrustedContentForModel(envelope, options);
     return createTextResult(rendered.text, {
         kind: "untrustedContent",
-        id: envelope.id,
+        id: sanitizeHeaderValue(envelope.id),
         source: envelope.source,
-        label: envelope.label,
+        label: sanitizeHeaderValue(envelope.label),
         contentType: envelope.contentType,
         truncated: rendered.truncated,
         redacted: rendered.redacted,

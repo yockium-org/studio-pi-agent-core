@@ -108,7 +108,7 @@ Patterns are tested with `lastIndex` reset before and after matching, so global/
 
 ## Redaction and truncation
 
-By default, rendering redacts common secret shapes such as:
+By default, rendering redacts common secret shapes in content, metadata, rendered IDs/labels, and signal diagnostics, such as:
 
 - `Bearer ...`;
 - `sk-...`;
