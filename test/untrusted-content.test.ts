@@ -227,6 +227,14 @@ test("renderUntrustedContentForModel redacts sensitive prompt signal matches", (
     assert.doesNotMatch(JSON.stringify(result.details), /super-secret-value/u);
 });
 
+test("detectPromptInjectionSignals redacts sensitive matches before returning diagnostics", () => {
+    const signals = detectPromptInjectionSignals("token=super-secret-value", [
+        { kind: "secret_exfiltration", pattern: /token=\S+/iu },
+    ]);
+
+    assert.deepEqual(signals, [{ kind: "secret_exfiltration", match: "token=[REDACTED]", index: 0 }]);
+});
+
 test("additional prompt injection patterns are stateless even with global regex flags", () => {
     const globalPattern: PromptInjectionPattern = { kind: "policy_bypass", pattern: /\bzet live\b/giu };
 

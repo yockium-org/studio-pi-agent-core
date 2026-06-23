@@ -167,7 +167,7 @@ export const detectPromptInjectionSignals = (
     const signals: PromptInjectionSignal[] = [];
     for (const { kind, pattern } of patterns) {
         const match = testPattern(pattern, content);
-        if (match?.[0]) signals.push({ kind, match: match[0], index: match.index });
+        if (match?.[0]) signals.push({ kind, match: redactSensitiveText(match[0]), index: match.index });
     }
     return signals;
 };

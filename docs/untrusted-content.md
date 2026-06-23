@@ -104,7 +104,7 @@ createUntrustedContentEnvelope({
 });
 ```
 
-Patterns are tested with `lastIndex` reset before and after matching, so global/sticky regexes do not become stateful across calls.
+Patterns are tested with `lastIndex` reset before and after matching, so global/sticky regexes do not become stateful across calls. Signal `match` diagnostics are redacted before being returned or rendered, but project-specific patterns should still avoid deliberately matching whole secret payloads when a narrower phrase is enough.
 
 ## Redaction and truncation
 
