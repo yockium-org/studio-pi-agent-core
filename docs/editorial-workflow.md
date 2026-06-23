@@ -60,6 +60,38 @@ const phaseResult = await consultEditorialWorkflowPhase({
 });
 ```
 
+## Guarding phase context
+
+When a phase needs CMS, Telegram, web, tool, or file content as context, wrap that content before handing it to specialists. The workflow helpers do not inspect or sanitize `context` by themselves because projects own CMS shape and trust boundaries.
+
+```ts
+import {
+  consultEditorialWorkflowPhase,
+  createUntrustedContentEnvelope,
+  renderUntrustedContentForModel,
+} from "@studio/pi-agent-core";
+
+const cmsContext = renderUntrustedContentForModel(
+  createUntrustedContentEnvelope({
+    source: "cms",
+    label: "Existing article body",
+    content: articleSummary,
+    contentType: "markdown",
+    metadata: { collection: "articles", slug: article.slug, locale: "nl" },
+  }),
+).text;
+
+const review = await consultEditorialWorkflowPhase({
+  phase: "review",
+  intent: "article",
+  task: "Review the proposed article update before prepareMutation.",
+  context: cmsContext,
+  runner,
+});
+```
+
+This keeps the main workflow vocabulary trusted while treating fetched/editor-provided content as quoted data.
+
 ## Pi tool wrapper
 
 Use `createConsultEditorialWorkflowPhaseTool` to expose phase consultation as a Pi tool:

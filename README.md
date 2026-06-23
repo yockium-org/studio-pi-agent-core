@@ -18,8 +18,10 @@ This package intentionally starts small. It contains project-neutral utilities t
 - `extractTelegramAudioAttachment` / `downloadTelegramFile` / `transcribeTelegramAudio` / `buildTelegramAudioTranscriptPrompt` — provider-agnostic Telegram audio transcription pipeline helpers. Projects inject the concrete `AudioTranscriber` provider.
 - `defineSpecialistSkill` / `createSpecialistRegistry` / `routeSpecialists` / `consultSpecialists` / `createConsultSpecialistsTool` — advisory specialist-helper orchestration with policy-gated capabilities, router contracts, and helper self-accept/decline decisions.
 - `createEditorialSpecialistSkills` / `createEditorialSpecialistRegistry` / `createEditorialSpecialistRouter` / `createEditorialSpecialistPolicy` — default advisory editorial helper cards for content quality, GEO, entity clarity, CMS structure, and safety review.
-- `createEditorialWorkflowPlan` / `consultEditorialWorkflowPhase` / `createConsultEditorialWorkflowPhaseTool` — phase-aware editorial workflow helpers for discover, plan, draft, review, polish, and prepare-mutation flows.
-- `createUntrustedContentEnvelope` / `renderUntrustedContentForModel` / `createUntrustedContentResult` — prompt-injection-aware wrappers for CMS, Telegram, web, user, tool, and file content that must be treated as data rather than instructions.
+- `createEditorialWorkflowPlan` / `getEditorialWorkflowPhasePreset` / `getEditorialWorkflowSpecialistIds` / `createEditorialWorkflowConsultRequest` / `consultEditorialWorkflowPhase` / `createConsultEditorialWorkflowPhaseTool` — phase-aware editorial workflow helpers for discover, plan, draft, review, polish, and prepare-mutation flows.
+- `createEditorialWorkflowPolicy` / `hasUnsafeEditorialWorkflowIntent` / `editorialWorkflowPhases` / `editorialWorkflowIntents` — shared workflow policy, routing, and vocabulary helpers.
+- `createUntrustedContentEnvelope` / `renderUntrustedContentForModel` / `renderUntrustedContentListForModel` / `createUntrustedContentResult` — prompt-injection-aware wrappers for CMS, Telegram, web, user, tool, and file content that must be treated as data rather than instructions.
+- `detectPromptInjectionSignals` / `redactSensitiveText` / `untrustedContentSources` / `untrustedContentTypes` — reusable signal detection, redaction, and source/type vocabulary for project adapters.
 
 ## Adapter boundary
 
