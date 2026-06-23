@@ -73,8 +73,12 @@ const sensitiveTextRedactions = [
     { pattern: /\bsk-[A-Za-z0-9_-]{12,}\b/giu, replacement: "[REDACTED]" },
     { pattern: /\bxox[baprs]-[A-Za-z0-9-]{12,}\b/giu, replacement: "[REDACTED]" },
     {
-        pattern: /(^|[^\p{L}\p{N}_-])(["']?(?:api[_-]?key|token|secret|password)["']?\s*[:=]\s*["']?)([^"'\s,}]+)(["']?)/giu,
-        replacement: "$1$2[REDACTED]$4",
+        pattern: /(^|[^\p{L}\p{N}_-])(["']?(?:api[_-]?key|token|secret|password)["']?\s*[:=]\s*)(["'])([^"']*)\3/giu,
+        replacement: "$1$2$3[REDACTED]$3",
+    },
+    {
+        pattern: /(^|[^\p{L}\p{N}_-])(["']?(?:api[_-]?key|token|secret|password)["']?\s*[:=]\s*)(?!["'])([^\s,}]+)/giu,
+        replacement: "$1$2[REDACTED]",
     },
 ] as const;
 

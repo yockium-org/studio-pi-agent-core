@@ -25,14 +25,15 @@ test("untrusted content constants are frozen public values", () => {
 
 test("redactSensitiveText removes common secret shapes", () => {
     const redacted = redactSensitiveText(
-        "api_key=abc123 token: xyz789 Bearer abcdefghijklmnopqrstuvwxyz sk-1234567890abcdef {\"password\": \"json-secret\"}",
+        "api_key=abc123 token: xyz789 secret: 'two word secret' Bearer abcdefghijklmnopqrstuvwxyz sk-1234567890abcdef {\"password\": \"json secret\"}",
     );
 
     assert.match(redacted, /api_key=\[REDACTED\]/u);
     assert.match(redacted, /token: \[REDACTED\]/u);
     assert.match(redacted, /Bearer \[REDACTED\]/u);
+    assert.match(redacted, /secret: '\[REDACTED\]'/u);
     assert.match(redacted, /"password": "\[REDACTED\]"/u);
-    assert.doesNotMatch(redacted, /sk-1234567890abcdef|json-secret/u);
+    assert.doesNotMatch(redacted, /sk-1234567890abcdef|two word secret|json secret/u);
 });
 
 test("createUntrustedContentEnvelope stringifies content and detects prompt injection signals", () => {
@@ -158,7 +159,7 @@ test("renderUntrustedContentForModel redacts sensitive metadata and reports reda
         source: "cms",
         label: "Article metadata",
         content: "body",
-        metadata: { token: "metadata-secret", nested: { api_key: "nested-secret" } },
+        metadata: { token: "metadata secret", nested: { api_key: "nested secret" } },
     });
 
     const rendered = renderUntrustedContentForModel(envelope);
@@ -166,7 +167,7 @@ test("renderUntrustedContentForModel redacts sensitive metadata and reports reda
     assert.equal(rendered.redacted, true);
     assert.match(rendered.text, /"token": "\[REDACTED\]"/u);
     assert.match(rendered.text, /"api_key": "\[REDACTED\]"/u);
-    assert.doesNotMatch(rendered.text, /metadata-secret|nested-secret/u);
+    assert.doesNotMatch(rendered.text, /metadata secret|nested secret/u);
 });
 
 test("renderUntrustedContentForModel redacts secrets and truncates large content", () => {
