@@ -138,6 +138,7 @@ export {
     redactSensitiveText,
     renderUntrustedContentForModel,
     renderUntrustedContentListForModel,
+    promptInjectionSignalKinds,
     untrustedContentSources,
     untrustedContentTypes,
     type CreateUntrustedContentEnvelopeOptions,

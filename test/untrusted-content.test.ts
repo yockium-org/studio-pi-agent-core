@@ -8,6 +8,7 @@ import {
     redactSensitiveText,
     renderUntrustedContentForModel,
     renderUntrustedContentListForModel,
+    promptInjectionSignalKinds,
     untrustedContentSources,
     untrustedContentTypes,
     type PromptInjectionPattern,
@@ -18,9 +19,18 @@ const readToolText = (result: any) => result.content[0].text;
 test("untrusted content constants are frozen public values", () => {
     assert.deepEqual(untrustedContentSources, ["cms", "telegram", "web", "user", "tool", "file", "unknown"]);
     assert.deepEqual(untrustedContentTypes, ["text", "markdown", "html", "json", "richTextSummary", "unknown"]);
+    assert.deepEqual(promptInjectionSignalKinds, [
+        "instruction_override",
+        "secret_exfiltration",
+        "tool_use_request",
+        "policy_bypass",
+        "role_confusion",
+    ]);
     assert.equal(Object.isFrozen(untrustedContentSources), true);
     assert.equal(Object.isFrozen(untrustedContentTypes), true);
+    assert.equal(Object.isFrozen(promptInjectionSignalKinds), true);
     assert.throws(() => (untrustedContentSources as unknown as string[]).push("shell"));
+    assert.throws(() => (promptInjectionSignalKinds as unknown as string[]).push("custom_kind"));
 });
 
 test("redactSensitiveText removes common secret shapes", () => {

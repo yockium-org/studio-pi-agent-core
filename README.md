@@ -21,7 +21,7 @@ This package intentionally starts small. It contains project-neutral utilities t
 - `createEditorialWorkflowPlan` / `getEditorialWorkflowPhasePreset` / `getEditorialWorkflowSpecialistIds` / `createEditorialWorkflowConsultRequest` / `consultEditorialWorkflowPhase` / `createConsultEditorialWorkflowPhaseTool` — phase-aware editorial workflow helpers for discover, plan, draft, review, polish, and prepare-mutation flows.
 - `createEditorialWorkflowPolicy` / `hasUnsafeEditorialWorkflowIntent` / `editorialWorkflowPhases` / `editorialWorkflowIntents` — shared workflow policy, routing, and vocabulary helpers.
 - `createUntrustedContentEnvelope` / `renderUntrustedContentForModel` / `renderUntrustedContentListForModel` / `createUntrustedContentResult` — prompt-injection-aware wrappers for CMS, Telegram, web, user, tool, and file content that must be treated as data rather than instructions.
-- `detectPromptInjectionSignals` / `redactSensitiveText` / `untrustedContentSources` / `untrustedContentTypes` — reusable signal detection, redaction, and source/type vocabulary for project adapters.
+- `detectPromptInjectionSignals` / `redactSensitiveText` / `promptInjectionSignalKinds` / `untrustedContentSources` / `untrustedContentTypes` — reusable signal detection, redaction, and source/type/kind vocabulary for project adapters.
 
 ## Adapter boundary
 

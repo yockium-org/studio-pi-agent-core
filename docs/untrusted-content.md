@@ -75,7 +75,7 @@ The result is still a normal Pi text result, but `details` includes:
 
 ## Prompt-injection signals
 
-`detectPromptInjectionSignals` detects common patterns:
+`detectPromptInjectionSignals` detects common patterns. The public `promptInjectionSignalKinds` array exposes the supported diagnostic vocabulary:
 
 - instruction override;
 - secret exfiltration;

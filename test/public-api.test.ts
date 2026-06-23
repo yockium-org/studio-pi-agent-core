@@ -64,6 +64,7 @@ const expectedValueExports = [
     "editorialWorkflowPhases",
     "editorialSpecialistCapabilities",
     "editorialSpecialistIds",
+    "promptInjectionSignalKinds",
     "safeEditorialSpecialistCapabilities",
     "untrustedContentSources",
     "untrustedContentTypes",

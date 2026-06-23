@@ -11,7 +11,7 @@ Adds phase-aware editorial workflow helpers and untrusted-content / prompt-injec
 - `createEditorialWorkflowPolicy` for phase-aware helper caps while preserving hard-denied write/publish/delete/runtime capabilities;
 - `createUntrustedContentEnvelope` for marking CMS, Telegram, web, user, tool, and file content as data rather than instructions;
 - `renderUntrustedContentForModel` and `renderUntrustedContentListForModel` for model-facing quoted blocks with explicit safety rules;
-- `detectPromptInjectionSignals` for common instruction-override, secret-exfiltration, tool-use, policy-bypass, and role-confusion signals;
+- `detectPromptInjectionSignals` and `promptInjectionSignalKinds` for common instruction-override, secret-exfiltration, tool-use, policy-bypass, and role-confusion signals;
 - `redactSensitiveText` for common token/API key/secret shapes before model rendering;
 - `createUntrustedContentResult` for Pi-compatible tool results that preserve guard metadata;
 - `docs/editorial-workflow.md` with the intended writing/review/prepare flow;

@@ -22,6 +22,8 @@ const promptInjectionSignalKindValues = [
 
 export type PromptInjectionSignalKind = (typeof promptInjectionSignalKindValues)[number];
 
+export const promptInjectionSignalKinds: readonly PromptInjectionSignalKind[] = Object.freeze([...promptInjectionSignalKindValues]);
+
 export type PromptInjectionSignal = {
     kind: PromptInjectionSignalKind;
     match: string;
