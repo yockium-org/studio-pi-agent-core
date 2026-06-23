@@ -12,12 +12,15 @@ export type UntrustedContentType = (typeof untrustedContentTypeValues)[number];
 
 export const untrustedContentTypes: readonly UntrustedContentType[] = Object.freeze([...untrustedContentTypeValues]);
 
-export type PromptInjectionSignalKind =
-    | "instruction_override"
-    | "secret_exfiltration"
-    | "tool_use_request"
-    | "policy_bypass"
-    | "role_confusion";
+const promptInjectionSignalKindValues = [
+    "instruction_override",
+    "secret_exfiltration",
+    "tool_use_request",
+    "policy_bypass",
+    "role_confusion",
+] as const;
+
+export type PromptInjectionSignalKind = (typeof promptInjectionSignalKindValues)[number];
 
 export type PromptInjectionSignal = {
     kind: PromptInjectionSignalKind;
@@ -137,6 +140,9 @@ const normalizeUntrustedContentSource = (source: UntrustedContentSource): Untrus
 const normalizeUntrustedContentType = (contentType: UntrustedContentType | undefined): UntrustedContentType =>
     contentType && (untrustedContentTypeValues as readonly string[]).includes(contentType) ? contentType : "unknown";
 
+const normalizePromptInjectionSignalKind = (kind: PromptInjectionSignalKind): PromptInjectionSignalKind =>
+    (promptInjectionSignalKindValues as readonly string[]).includes(kind) ? kind : "policy_bypass";
+
 const cloneMetadataValue = (value: unknown, seen = new WeakMap<object, unknown>()): unknown => {
     if (typeof value !== "object" || value === null) return value;
     if (seen.has(value)) return seen.get(value);
@@ -184,7 +190,7 @@ export const detectPromptInjectionSignals = (
     const signals: PromptInjectionSignal[] = [];
     for (const { kind, pattern } of patterns) {
         const match = testPattern(pattern, content);
-        if (match?.[0]) signals.push({ kind, match: redactSensitiveText(match[0]), index: match.index });
+        if (match?.[0]) signals.push({ kind: normalizePromptInjectionSignalKind(kind), match: redactSensitiveText(match[0]), index: match.index });
     }
     return signals;
 };
@@ -243,7 +249,15 @@ const renderSignals = (signals: readonly PromptInjectionSignal[]): string[] => {
 };
 
 const prepareSignalsForRendering = (signals: readonly PromptInjectionSignal[], redactMatches: boolean): readonly PromptInjectionSignal[] =>
-    Object.freeze(signals.map((signal) => Object.freeze({ ...signal, match: redactMatches ? redactSensitiveText(signal.match) : signal.match })));
+    Object.freeze(
+        signals.map((signal) =>
+            Object.freeze({
+                ...signal,
+                kind: normalizePromptInjectionSignalKind(signal.kind),
+                match: redactMatches ? redactSensitiveText(signal.match) : signal.match,
+            }),
+        ),
+    );
 
 export const renderUntrustedContentForModel = (
     envelope: UntrustedContentEnvelope,
