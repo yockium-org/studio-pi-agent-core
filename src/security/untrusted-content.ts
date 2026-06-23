@@ -131,6 +131,12 @@ const slugPart = (value: string): string => value.toLowerCase().replace(/[^a-z0-
 const createEnvelopeId = (source: UntrustedContentSource, label: string, content: string): string =>
     `${source}:${slugPart(redactSensitiveText(label))}:${stableHash(redactSensitiveText(content))}`;
 
+const normalizeUntrustedContentSource = (source: UntrustedContentSource): UntrustedContentSource =>
+    (untrustedContentSourceValues as readonly string[]).includes(source) ? source : "unknown";
+
+const normalizeUntrustedContentType = (contentType: UntrustedContentType | undefined): UntrustedContentType =>
+    contentType && (untrustedContentTypeValues as readonly string[]).includes(contentType) ? contentType : "unknown";
+
 const cloneMetadata = (metadata: Readonly<Record<string, unknown>> | undefined): Readonly<Record<string, unknown>> | undefined => {
     if (!metadata) return undefined;
     return Object.freeze({ ...metadata });
@@ -167,17 +173,19 @@ export const detectPromptInjectionSignals = (
 };
 
 export const createUntrustedContentEnvelope = (options: CreateUntrustedContentEnvelopeOptions): UntrustedContentEnvelope => {
+    const source = normalizeUntrustedContentSource(options.source);
+    const contentType = normalizeUntrustedContentType(options.contentType ?? "text");
     const content = stringifyContent(options.content);
     const promptInjectionSignals = options.detectPromptInjection === false
         ? []
         : detectPromptInjectionSignals(content, options.additionalPromptInjectionPatterns);
 
     return Object.freeze({
-        id: options.id ?? createEnvelopeId(options.source, options.label, content),
-        source: options.source,
+        id: options.id ?? createEnvelopeId(source, options.label, content),
+        source,
         label: options.label,
         content,
-        contentType: options.contentType ?? "text",
+        contentType,
         ...(options.metadata ? { metadata: cloneMetadata(options.metadata) } : {}),
         promptInjectionSignals: Object.freeze(promptInjectionSignals.map((signal) => Object.freeze({ ...signal }))),
     });

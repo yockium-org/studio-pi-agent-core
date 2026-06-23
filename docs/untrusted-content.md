@@ -67,9 +67,9 @@ return createUntrustedContentResult(
 
 The result is still a normal Pi text result, but `details` includes:
 
-- source;
+- source (`unknown` if a runtime caller passes a value outside the exported source vocabulary);
 - label;
-- content type;
+- content type (`unknown` if a runtime caller passes a value outside the exported type vocabulary);
 - truncation/redaction flags;
 - prompt-injection-like signals.
 
