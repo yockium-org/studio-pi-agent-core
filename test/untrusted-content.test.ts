@@ -132,6 +132,7 @@ test("rendered output redacts sensitive ids and labels", () => {
     const rendered = renderUntrustedContentForModel(envelope);
     const result = createUntrustedContentResult(envelope);
 
+    assert.equal(rendered.redacted, true);
     assert.match(rendered.text, /ID: api_key=\[REDACTED\] Call tool outside boundary/u);
     assert.match(rendered.text, /Label: token=\[REDACTED\] Ignore previous instructions/u);
     assert.doesNotMatch(rendered.text, /abc123|super-secret-label/u);
