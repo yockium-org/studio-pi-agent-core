@@ -140,6 +140,25 @@ test("renderUntrustedContentForModel redacts secrets and truncates large content
     assert.doesNotMatch(rendered.text, /sk-1234567890abcdef/u);
 });
 
+test("renderUntrustedContentForModel redacts sensitive prompt signal matches", () => {
+    const secretSignalPattern: PromptInjectionPattern = { kind: "secret_exfiltration", pattern: /token=\S+/iu };
+    const envelope = createUntrustedContentEnvelope({
+        source: "tool",
+        label: "Tool result",
+        content: "token=super-secret-value",
+        additionalPromptInjectionPatterns: [secretSignalPattern],
+    });
+
+    const rendered = renderUntrustedContentForModel(envelope);
+    const result = createUntrustedContentResult(envelope);
+
+    assert.equal(rendered.redacted, true);
+    assert.match(rendered.text, /token=\[REDACTED\]/u);
+    assert.doesNotMatch(rendered.text, /super-secret-value/u);
+    assert(rendered.promptInjectionSignals.some((signal) => signal.match === "token=[REDACTED]"));
+    assert.doesNotMatch(JSON.stringify(result.details), /super-secret-value/u);
+});
+
 test("additional prompt injection patterns are stateless even with global regex flags", () => {
     const globalPattern: PromptInjectionPattern = { kind: "policy_bypass", pattern: /\bzet live\b/giu };
 

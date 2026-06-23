@@ -202,18 +202,24 @@ const renderSignals = (signals: readonly PromptInjectionSignal[]): string[] => {
     ];
 };
 
+const prepareSignalsForRendering = (signals: readonly PromptInjectionSignal[], redactMatches: boolean): readonly PromptInjectionSignal[] =>
+    Object.freeze(signals.map((signal) => Object.freeze({ ...signal, match: redactMatches ? redactSensitiveText(signal.match) : signal.match })));
+
 export const renderUntrustedContentForModel = (
     envelope: UntrustedContentEnvelope,
     options: UntrustedContentRenderOptions = {},
 ): UntrustedContentRenderResult => {
     const maxContentLength = options.maxContentLength ?? defaultMaxContentLength;
+    const shouldRedactSensitiveContent = options.redactSensitiveContent !== false;
     const contentBeforeRedaction = envelope.content;
-    const contentAfterRedaction = options.redactSensitiveContent === false ? contentBeforeRedaction : redactSensitiveText(contentBeforeRedaction);
+    const contentAfterRedaction = shouldRedactSensitiveContent ? redactSensitiveText(contentBeforeRedaction) : contentBeforeRedaction;
     const { content, truncated } = truncateContent(contentAfterRedaction, maxContentLength);
-    const redacted = contentAfterRedaction !== contentBeforeRedaction;
     const additionalSignals = detectPromptInjectionSignals(envelope.content, options.additionalPromptInjectionPatterns);
     const signalKey = (signal: PromptInjectionSignal) => `${signal.kind}:${signal.index}:${signal.match}`;
     const signals = [...new Map([...envelope.promptInjectionSignals, ...additionalSignals].map((signal) => [signalKey(signal), signal])).values()];
+    const renderedSignals = prepareSignalsForRendering(signals, shouldRedactSensitiveContent);
+    const redactedSignals = renderedSignals.some((signal, index) => signal.match !== signals[index]?.match);
+    const redacted = contentAfterRedaction !== contentBeforeRedaction || redactedSignals;
 
     const header = [
         "UNTRUSTED CONTENT BLOCK",
@@ -228,7 +234,7 @@ export const renderUntrustedContentForModel = (
     ];
 
     const metadata = options.includeMetadata === false ? [] : renderMetadata(envelope.metadata);
-    const signalsText = options.includeSignals === false ? [] : renderSignals(signals);
+    const signalsText = options.includeSignals === false ? [] : renderSignals(renderedSignals);
     const truncationNotice = truncated ? [`Content truncated to ${maxContentLength} character(s).`] : [];
 
     return Object.freeze({
@@ -243,7 +249,7 @@ export const renderUntrustedContentForModel = (
         ].join("\n"),
         truncated,
         redacted,
-        promptInjectionSignals: Object.freeze(signals.map((signal) => Object.freeze({ ...signal }))),
+        promptInjectionSignals: renderedSignals,
     });
 };
 
