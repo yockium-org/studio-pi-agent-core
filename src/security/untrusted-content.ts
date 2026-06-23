@@ -137,9 +137,26 @@ const normalizeUntrustedContentSource = (source: UntrustedContentSource): Untrus
 const normalizeUntrustedContentType = (contentType: UntrustedContentType | undefined): UntrustedContentType =>
     contentType && (untrustedContentTypeValues as readonly string[]).includes(contentType) ? contentType : "unknown";
 
+const cloneMetadataValue = (value: unknown, seen = new WeakMap<object, unknown>()): unknown => {
+    if (typeof value !== "object" || value === null) return value;
+    if (seen.has(value)) return seen.get(value);
+
+    if (Array.isArray(value)) {
+        const clone: unknown[] = [];
+        seen.set(value, clone);
+        for (const item of value) clone.push(cloneMetadataValue(item, seen));
+        return Object.freeze(clone);
+    }
+
+    const clone: Record<string, unknown> = {};
+    seen.set(value, clone);
+    for (const [key, nestedValue] of Object.entries(value)) clone[key] = cloneMetadataValue(nestedValue, seen);
+    return Object.freeze(clone);
+};
+
 const cloneMetadata = (metadata: Readonly<Record<string, unknown>> | undefined): Readonly<Record<string, unknown>> | undefined => {
     if (!metadata) return undefined;
-    return Object.freeze({ ...metadata });
+    return cloneMetadataValue(metadata) as Readonly<Record<string, unknown>>;
 };
 
 const testPattern = (pattern: RegExp, text: string): RegExpExecArray | null => {

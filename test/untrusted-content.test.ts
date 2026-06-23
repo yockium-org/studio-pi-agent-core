@@ -102,6 +102,30 @@ test("createUntrustedContentEnvelope preserves cyclic and BigInt content markers
     assert.match(envelope.content, /"self": "\[Circular\]"/u);
 });
 
+test("createUntrustedContentEnvelope snapshots and freezes nested metadata", () => {
+    const tags = ["breathing"];
+    const nested = { author: "Ana", tags };
+    const envelope = createUntrustedContentEnvelope({
+        source: "cms",
+        label: "Metadata snapshot",
+        content: "body",
+        metadata: { nested },
+    });
+
+    nested.author = "Mallory";
+    tags.push("mutated");
+
+    const snapshot = envelope.metadata as any;
+    const rendered = renderUntrustedContentForModel(envelope);
+
+    assert.equal(Object.isFrozen(snapshot), true);
+    assert.equal(Object.isFrozen(snapshot.nested), true);
+    assert.equal(Object.isFrozen(snapshot.nested.tags), true);
+    assert.match(rendered.text, /"author": "Ana"/u);
+    assert.match(rendered.text, /"breathing"/u);
+    assert.doesNotMatch(rendered.text, /Mallory|mutated/u);
+});
+
 test("renderUntrustedContentForModel marks data boundaries and quotes content", () => {
     const envelope = createUntrustedContentEnvelope({
         source: "cms",
