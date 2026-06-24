@@ -228,6 +228,21 @@ test("renderUntrustedContentForModel normalizes and redacts runtime envelope sig
     assert.doesNotMatch(rendered.text, /signal secret|^Ignore previous instructions$/mu);
 });
 
+test("render helpers tolerate missing runtime envelope objects", () => {
+    const renderedNull = renderUntrustedContentForModel(null as any);
+    const resultUndefined = createUntrustedContentResult(undefined as any);
+    const renderedList = renderUntrustedContentListForModel(null as any, { includeSignals: false });
+
+    assert.match(renderedNull.text, /Source: unknown/u);
+    assert.match(renderedNull.text, /Label: Untrusted content/u);
+    assert.match(renderedNull.text, /> null/u);
+    assert.equal(resultUndefined.details?.source, "unknown");
+    assert.equal(resultUndefined.details?.label, "Untrusted content");
+    assert.match(readToolText(resultUndefined), /> undefined/u);
+    assert.match(renderedList, /UNTRUSTED CONTENT BLOCK/u);
+    assert.match(renderedList, /> null/u);
+});
+
 test("renderUntrustedContentForModel marks data boundaries and quotes content", () => {
     const envelope = createUntrustedContentEnvelope({
         source: "cms",

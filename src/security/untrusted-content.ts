@@ -297,27 +297,53 @@ const hasRedactedSignalMatches = (signals: readonly PromptInjectionSignal[] | un
         return redactSensitiveText(rawMatch) !== rawMatch;
     });
 
+const normalizeRenderableEnvelope = (envelope: UntrustedContentEnvelope | unknown): UntrustedContentEnvelope => {
+    if (!envelope || typeof envelope !== "object") {
+        return createUntrustedContentEnvelope({ source: "unknown", label: "Untrusted content", content: envelope });
+    }
+
+    const candidate = envelope as Partial<UntrustedContentEnvelope>;
+    const source = normalizeUntrustedContentSource(candidate.source as UntrustedContentSource);
+    const contentType = normalizeUntrustedContentType(candidate.contentType as UntrustedContentType | undefined);
+    const label = normalizeEnvelopeString(candidate.label, "Untrusted content");
+    const content = stringifyContent(candidate.content);
+    const id = normalizeEnvelopeString(candidate.id, "") || createEnvelopeId(source, label, content);
+    const metadata = candidate.metadata && typeof candidate.metadata === "object" ? cloneMetadata(candidate.metadata) : undefined;
+    const promptInjectionSignals = Array.isArray(candidate.promptInjectionSignals) ? candidate.promptInjectionSignals : [];
+
+    return Object.freeze({
+        id,
+        source,
+        label,
+        content,
+        contentType,
+        ...(metadata ? { metadata } : {}),
+        promptInjectionSignals: Object.freeze([...promptInjectionSignals]) as readonly PromptInjectionSignal[],
+    });
+};
+
 export const renderUntrustedContentForModel = (
     envelope: UntrustedContentEnvelope,
     options: UntrustedContentRenderOptions = {},
 ): UntrustedContentRenderResult => {
+    const normalizedEnvelope = normalizeRenderableEnvelope(envelope);
     const maxContentLength = options.maxContentLength ?? defaultMaxContentLength;
     const shouldRedactSensitiveContent = options.redactSensitiveContent !== false;
-    const source = normalizeUntrustedContentSource(envelope.source);
-    const contentType = normalizeUntrustedContentType(envelope.contentType);
-    const contentBeforeRedaction = stringifyContent(envelope.content);
+    const source = normalizeUntrustedContentSource(normalizedEnvelope.source);
+    const contentType = normalizeUntrustedContentType(normalizedEnvelope.contentType);
+    const contentBeforeRedaction = stringifyContent(normalizedEnvelope.content);
     const contentAfterRedaction = shouldRedactSensitiveContent ? redactSensitiveText(contentBeforeRedaction) : contentBeforeRedaction;
     const { content, truncated } = truncateContent(contentAfterRedaction, maxContentLength);
     const additionalSignals = detectPromptInjectionSignals(contentBeforeRedaction, options.additionalPromptInjectionPatterns);
     const signalKey = (signal: PromptInjectionSignal) => `${signal.kind}:${signal.index}:${signal.match}`;
-    const envelopeSignals = normalizePromptInjectionSignals(envelope.promptInjectionSignals, shouldRedactSensitiveContent);
+    const envelopeSignals = normalizePromptInjectionSignals(normalizedEnvelope.promptInjectionSignals, shouldRedactSensitiveContent);
     const signals = [...new Map([...envelopeSignals, ...additionalSignals].map((signal) => [signalKey(signal), signal])).values()];
     const renderedSignals = Object.freeze(signals.map((signal) => Object.freeze({ ...signal })));
-    const redactedSignals = hasRedactedSignalMatches(envelope.promptInjectionSignals, shouldRedactSensitiveContent);
+    const redactedSignals = hasRedactedSignalMatches(normalizedEnvelope.promptInjectionSignals, shouldRedactSensitiveContent);
     const redactedSignalDiagnostics = redactedSignals || renderedSignals.some((signal) => signal.match.includes("[REDACTED]"));
-    const metadata = options.includeMetadata === false ? { lines: [], redacted: false } : renderMetadata(envelope.metadata);
-    const renderedId = prepareHeaderValue(envelope.id);
-    const renderedLabel = prepareHeaderValue(envelope.label);
+    const metadata = options.includeMetadata === false ? { lines: [], redacted: false } : renderMetadata(normalizedEnvelope.metadata);
+    const renderedId = prepareHeaderValue(normalizedEnvelope.id);
+    const renderedLabel = prepareHeaderValue(normalizedEnvelope.label);
     const redacted = contentAfterRedaction !== contentBeforeRedaction || metadata.redacted || redactedSignalDiagnostics || renderedId.redacted || renderedLabel.redacted;
 
     const header = [
@@ -351,22 +377,26 @@ export const renderUntrustedContentForModel = (
     });
 };
 
+const normalizeRenderableEnvelopeList = (envelopes: readonly UntrustedContentEnvelope[] | unknown): unknown[] =>
+    Array.isArray(envelopes) ? envelopes : [envelopes];
+
 export const renderUntrustedContentListForModel = (
     envelopes: readonly UntrustedContentEnvelope[],
     options: UntrustedContentRenderOptions = {},
-): string => envelopes.map((envelope) => renderUntrustedContentForModel(envelope, options).text).join("\n\n");
+): string => normalizeRenderableEnvelopeList(envelopes).map((envelope) => renderUntrustedContentForModel(envelope as UntrustedContentEnvelope, options).text).join("\n\n");
 
 export const createUntrustedContentResult = (
     envelope: UntrustedContentEnvelope,
     options: UntrustedContentRenderOptions = {},
 ): TextToolResult => {
-    const rendered = renderUntrustedContentForModel(envelope, options);
+    const normalizedEnvelope = normalizeRenderableEnvelope(envelope);
+    const rendered = renderUntrustedContentForModel(normalizedEnvelope, options);
     return createTextResult(rendered.text, {
         kind: "untrustedContent",
-        id: sanitizeHeaderValue(envelope.id),
-        source: normalizeUntrustedContentSource(envelope.source),
-        label: sanitizeHeaderValue(envelope.label),
-        contentType: normalizeUntrustedContentType(envelope.contentType),
+        id: sanitizeHeaderValue(normalizedEnvelope.id),
+        source: normalizeUntrustedContentSource(normalizedEnvelope.source),
+        label: sanitizeHeaderValue(normalizedEnvelope.label),
+        contentType: normalizeUntrustedContentType(normalizedEnvelope.contentType),
         truncated: rendered.truncated,
         redacted: rendered.redacted,
         promptInjectionSignals: rendered.promptInjectionSignals,
