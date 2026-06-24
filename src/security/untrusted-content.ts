@@ -187,7 +187,7 @@ const testPattern = (pattern: RegExp, text: string): RegExpExecArray | null => {
 };
 
 export const redactSensitiveText = (text: string): string => {
-    let redacted = text;
+    let redacted = typeof text === "string" ? text : stringifyContent(text);
     for (const { pattern, replacement } of sensitiveTextRedactions) {
         pattern.lastIndex = 0;
         redacted = redacted.replace(pattern, replacement);
@@ -200,10 +200,11 @@ export const detectPromptInjectionSignals = (
     content: string,
     additionalPatterns: readonly PromptInjectionPattern[] = [],
 ): PromptInjectionSignal[] => {
+    const text = typeof content === "string" ? content : stringifyContent(content);
     const patterns = [...defaultPromptInjectionPatterns, ...normalizePromptInjectionPatterns(additionalPatterns)];
     const signals: PromptInjectionSignal[] = [];
     for (const { kind, pattern } of patterns) {
-        const match = testPattern(pattern, content);
+        const match = testPattern(pattern, text);
         if (match?.[0]) signals.push({ kind: normalizePromptInjectionSignalKind(kind), match: redactSensitiveText(match[0]), index: match.index });
     }
     return signals;
