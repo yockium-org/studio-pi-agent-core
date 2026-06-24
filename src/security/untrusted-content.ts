@@ -325,7 +325,7 @@ const normalizeRenderableEnvelope = (envelope: UntrustedContentEnvelope | unknow
 };
 
 export const renderUntrustedContentForModel = (
-    envelope: UntrustedContentEnvelope,
+    envelope: unknown,
     options: UntrustedContentRenderOptions = {},
 ): UntrustedContentRenderResult => {
     const normalizedEnvelope = normalizeRenderableEnvelope(envelope);
@@ -383,12 +383,12 @@ const normalizeRenderableEnvelopeList = (envelopes: readonly UntrustedContentEnv
     Array.isArray(envelopes) ? envelopes : [envelopes];
 
 export const renderUntrustedContentListForModel = (
-    envelopes: readonly UntrustedContentEnvelope[],
+    envelopes: unknown,
     options: UntrustedContentRenderOptions = {},
-): string => normalizeRenderableEnvelopeList(envelopes).map((envelope) => renderUntrustedContentForModel(envelope as UntrustedContentEnvelope, options).text).join("\n\n");
+): string => normalizeRenderableEnvelopeList(envelopes).map((envelope) => renderUntrustedContentForModel(envelope, options).text).join("\n\n");
 
 export const createUntrustedContentResult = (
-    envelope: UntrustedContentEnvelope,
+    envelope: unknown,
     options: UntrustedContentRenderOptions = {},
 ): TextToolResult => {
     const normalizedEnvelope = normalizeRenderableEnvelope(envelope);
