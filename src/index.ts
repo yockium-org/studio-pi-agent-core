@@ -143,6 +143,7 @@ export {
     untrustedContentTypes,
     type CreateUntrustedContentEnvelopeOptions,
     type PromptInjectionPattern,
+    type PromptInjectionPatternInput,
     type PromptInjectionSignal,
     type PromptInjectionSignalKind,
     type UntrustedContentEnvelope,

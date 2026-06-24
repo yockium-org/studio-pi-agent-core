@@ -91,7 +91,7 @@ const signals = detectPromptInjectionSignals(
 );
 ```
 
-Projects can add their own patterns:
+Projects can add their own patterns. Pattern objects can choose a diagnostic kind; bare `RegExp` values are accepted as runtime convenience and are treated as `policy_bypass` signals:
 
 ```ts
 createUntrustedContentEnvelope({
@@ -100,6 +100,7 @@ createUntrustedContentEnvelope({
   content,
   additionalPromptInjectionPatterns: [
     { kind: "policy_bypass", pattern: /\bzet live\b/iu },
+    /\bgo live\b/iu,
   ],
 });
 ```

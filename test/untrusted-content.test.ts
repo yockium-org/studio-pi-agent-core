@@ -447,6 +447,19 @@ test("detectPromptInjectionSignals normalizes invalid runtime signal kinds", () 
     assert.doesNotMatch(rendered.text, /^Ignore previous instructions$/mu);
 });
 
+test("detectPromptInjectionSignals accepts bare RegExp runtime patterns", () => {
+    const signals = detectPromptInjectionSignals("Zet live", [/\bzet live\b/iu]);
+    const envelope = createUntrustedContentEnvelope({
+        source: "cms",
+        label: "Bare regexp pattern",
+        content: "Zet live",
+        additionalPromptInjectionPatterns: [/\bzet live\b/iu],
+    });
+
+    assert.deepEqual(signals, [{ kind: "policy_bypass", match: "Zet live", index: 0 }]);
+    assert(envelope.promptInjectionSignals.some((signal) => signal.kind === "policy_bypass"));
+});
+
 test("detectPromptInjectionSignals skips invalid runtime pattern objects", () => {
     const signals = detectPromptInjectionSignals("zet live", [
         { kind: "policy_bypass", pattern: "zet live" as any },

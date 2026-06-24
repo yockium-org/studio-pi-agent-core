@@ -35,6 +35,8 @@ export type PromptInjectionPattern = {
     pattern: RegExp;
 };
 
+export type PromptInjectionPatternInput = PromptInjectionPattern | RegExp;
+
 export type UntrustedContentEnvelope = Readonly<{
     id: string;
     source: UntrustedContentSource;
@@ -53,7 +55,7 @@ export type CreateUntrustedContentEnvelopeOptions = {
     contentType?: UntrustedContentType;
     metadata?: Readonly<Record<string, unknown>>;
     detectPromptInjection?: boolean;
-    additionalPromptInjectionPatterns?: readonly PromptInjectionPattern[];
+    additionalPromptInjectionPatterns?: readonly PromptInjectionPatternInput[];
 };
 
 export type UntrustedContentRenderOptions = {
@@ -61,7 +63,7 @@ export type UntrustedContentRenderOptions = {
     includeMetadata?: boolean;
     includeSignals?: boolean;
     redactSensitiveContent?: boolean;
-    additionalPromptInjectionPatterns?: readonly PromptInjectionPattern[];
+    additionalPromptInjectionPatterns?: readonly PromptInjectionPatternInput[];
 };
 
 export type UntrustedContentRenderResult = Readonly<{
@@ -151,9 +153,10 @@ const normalizeEnvelopeString = (value: unknown, fallback: string): string => {
     return text || fallback;
 };
 
-const normalizePromptInjectionPatterns = (patterns: readonly PromptInjectionPattern[] | unknown): PromptInjectionPattern[] =>
+const normalizePromptInjectionPatterns = (patterns: readonly PromptInjectionPatternInput[] | unknown): PromptInjectionPattern[] =>
     Array.isArray(patterns)
         ? patterns.flatMap((candidate) => {
+              if (candidate instanceof RegExp) return [{ kind: "policy_bypass", pattern: candidate }];
               if (!(candidate?.pattern instanceof RegExp)) return [];
               return [{ kind: normalizePromptInjectionSignalKind(candidate.kind), pattern: candidate.pattern }];
           })
@@ -200,7 +203,7 @@ export const redactSensitiveText = (text: unknown): string => {
 
 export const detectPromptInjectionSignals = (
     content: unknown,
-    additionalPatterns: readonly PromptInjectionPattern[] = [],
+    additionalPatterns: readonly PromptInjectionPatternInput[] = [],
 ): PromptInjectionSignal[] => {
     const text = typeof content === "string" ? content : stringifyContent(content);
     const patterns = [...defaultPromptInjectionPatterns, ...normalizePromptInjectionPatterns(additionalPatterns)];
