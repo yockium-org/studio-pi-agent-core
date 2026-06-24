@@ -312,10 +312,11 @@ export const renderUntrustedContentForModel = (
     const signals = [...new Map([...envelopeSignals, ...additionalSignals].map((signal) => [signalKey(signal), signal])).values()];
     const renderedSignals = Object.freeze(signals.map((signal) => Object.freeze({ ...signal })));
     const redactedSignals = hasRedactedSignalMatches(envelope.promptInjectionSignals, shouldRedactSensitiveContent);
+    const redactedSignalDiagnostics = redactedSignals || renderedSignals.some((signal) => signal.match.includes("[REDACTED]"));
     const metadata = options.includeMetadata === false ? { lines: [], redacted: false } : renderMetadata(envelope.metadata);
     const renderedId = prepareHeaderValue(envelope.id);
     const renderedLabel = prepareHeaderValue(envelope.label);
-    const redacted = contentAfterRedaction !== contentBeforeRedaction || metadata.redacted || redactedSignals || renderedId.redacted || renderedLabel.redacted;
+    const redacted = contentAfterRedaction !== contentBeforeRedaction || metadata.redacted || redactedSignalDiagnostics || renderedId.redacted || renderedLabel.redacted;
 
     const header = [
         "UNTRUSTED CONTENT BLOCK",
