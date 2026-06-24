@@ -250,7 +250,9 @@ const prepareHeaderValue = (value: string, maxLength = 200): { value: string; re
 
 const sanitizeHeaderValue = (value: string, maxLength = 200): string => prepareHeaderValue(value, maxLength).value;
 
-const quoteUntrustedLines = (content: string): string => content.split(/\r?\n/u).map((line) => `> ${line}`).join("\n");
+const normalizeLineBreaks = (content: string): string => content.replace(/\r\n?/gu, "\n").replace(/[\u2028\u2029]/gu, "\n");
+
+const quoteUntrustedLines = (content: string): string => normalizeLineBreaks(content).split("\n").map((line) => `> ${line}`).join("\n");
 
 const renderMetadata = (metadata: Readonly<Record<string, unknown>> | undefined): { lines: string[]; redacted: boolean } => {
     if (!metadata || Object.keys(metadata).length === 0) return { lines: [], redacted: false };
