@@ -572,6 +572,19 @@ test("detectPromptInjectionSignals redacts sensitive matches before returning di
     assert.deepEqual(signals, [{ kind: "secret_exfiltration", match: "token=[REDACTED]", index: 0 }]);
 });
 
+test("detectPromptInjectionSignals collects repeated matches and caps diagnostics", () => {
+    const repeatedPattern: PromptInjectionPattern = { kind: "policy_bypass", pattern: /\bgo live\b/giu };
+    const repeatedSignals = detectPromptInjectionSignals("go live then go live", [repeatedPattern]);
+    const cappedSignals = detectPromptInjectionSignals(Array.from({ length: 25 }, () => "go live").join(" "), [repeatedPattern]);
+
+    assert.deepEqual(repeatedSignals, [
+        { kind: "policy_bypass", match: "go live", index: 0 },
+        { kind: "policy_bypass", match: "go live", index: 13 },
+    ]);
+    assert.equal(cappedSignals.length, 20);
+    assert.equal(repeatedPattern.pattern.lastIndex, 0);
+});
+
 test("additional prompt injection patterns are stateless even with global regex flags", () => {
     const globalPattern: PromptInjectionPattern = { kind: "policy_bypass", pattern: /\bzet live\b/giu };
 

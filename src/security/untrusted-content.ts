@@ -74,6 +74,7 @@ export type UntrustedContentRenderResult = Readonly<{
 }>;
 
 const defaultMaxContentLength = 12_000;
+const defaultMaxPromptInjectionSignals = 20;
 
 const sensitiveTextRedactions = [
     { pattern: /\b(Bearer\s+)[A-Za-z0-9._~+\-/]+=*/giu, replacement: "$1[REDACTED]" },
@@ -225,11 +226,26 @@ const cloneMetadata = (metadata: unknown): Readonly<Record<string, unknown>> | u
     return Object.freeze({ value: snapshot });
 };
 
-const testPattern = (pattern: RegExp, text: string): RegExpExecArray | null => {
+const createGlobalPattern = (pattern: RegExp): RegExp =>
+    pattern.global ? pattern : new RegExp(pattern.source, `${pattern.flags}g`);
+
+const collectPatternMatches = (pattern: RegExp, text: string, remaining: number): RegExpExecArray[] => {
+    if (remaining <= 0) return [];
     pattern.lastIndex = 0;
-    const match = pattern.exec(text);
-    pattern.lastIndex = 0;
-    return match;
+    const matches: RegExpExecArray[] = [];
+    try {
+        const matcher = createGlobalPattern(pattern);
+        matcher.lastIndex = 0;
+        while (matches.length < remaining) {
+            const match = matcher.exec(text);
+            if (!match) break;
+            matches.push(match);
+            if (match[0].length === 0) matcher.lastIndex += 1;
+        }
+    } finally {
+        pattern.lastIndex = 0;
+    }
+    return matches;
 };
 
 export const redactSensitiveText = (text: unknown): string => {
@@ -250,8 +266,10 @@ export const detectPromptInjectionSignals = (
     const patterns = [...defaultPromptInjectionPatterns, ...normalizePromptInjectionPatterns(additionalPatterns)];
     const signals: PromptInjectionSignal[] = [];
     for (const { kind, pattern } of patterns) {
-        const match = testPattern(pattern, text);
-        if (match?.[0]) signals.push({ kind: normalizePromptInjectionSignalKind(kind), match: sanitizeDiagnosticMatch(match[0]), index: match.index });
+        for (const match of collectPatternMatches(pattern, text, defaultMaxPromptInjectionSignals - signals.length)) {
+            if (match[0]) signals.push({ kind: normalizePromptInjectionSignalKind(kind), match: sanitizeDiagnosticMatch(match[0]), index: match.index });
+        }
+        if (signals.length >= defaultMaxPromptInjectionSignals) break;
     }
     return signals;
 };

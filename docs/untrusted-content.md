@@ -105,7 +105,7 @@ createUntrustedContentEnvelope({
 });
 ```
 
-Patterns are tested with `lastIndex` reset before and after matching, so global/sticky regexes do not become stateful across calls. Invalid runtime pattern collections/objects are ignored. Signal `kind` diagnostics are normalized to the known prompt-injection vocabulary, and signal `match` diagnostics are redacted and collapsed to a single display line before being returned or rendered. Project-specific patterns should still avoid deliberately matching whole secret payloads when a narrower phrase is enough.
+Patterns are tested with `lastIndex` reset before and after matching, so global/sticky regexes do not become stateful across calls. Repeated matches are reported up to a bounded diagnostic cap of 20 signals per scan. Invalid runtime pattern collections/objects are ignored. Signal `kind` diagnostics are normalized to the known prompt-injection vocabulary, and signal `match` diagnostics are redacted and collapsed to a single display line before being returned or rendered. Project-specific patterns should still avoid deliberately matching whole secret payloads when a narrower phrase is enough.
 
 ## Redaction and truncation
 
