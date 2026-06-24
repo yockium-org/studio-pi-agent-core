@@ -43,13 +43,13 @@ export type EditorialWorkflowPlan = Readonly<{
 }>;
 
 export type EditorialWorkflowConsultRequestOptions = {
-    phase: EditorialWorkflowPhase;
+    phase: unknown;
     task: string;
     context?: string;
-    intent?: EditorialWorkflowIntent;
-    maxHelpers?: number;
+    intent?: unknown;
+    maxHelpers?: unknown;
     includeSafetyForUnsafeIntent?: boolean;
-    additionalUnsafeIntentPatterns?: readonly RegExp[];
+    additionalUnsafeIntentPatterns?: unknown;
 };
 
 export type EditorialWorkflowConsultSummary = Readonly<{
@@ -86,8 +86,8 @@ export type ConsultEditorialWorkflowPhaseToolOptions<
     runner: SpecialistRunner<EditorialSpecialistId, EditorialSpecialistCapability, TOutput>;
     policy?: SpecialistPolicy<EditorialSpecialistCapability>;
     allowParallel?: boolean;
-    defaultIntent?: EditorialWorkflowIntent;
-    additionalUnsafeIntentPatterns?: readonly RegExp[];
+    defaultIntent?: unknown;
+    additionalUnsafeIntentPatterns?: unknown;
 };
 
 const baseArticleWorkflowPhases = [
@@ -240,7 +240,7 @@ const testUnsafePattern = (pattern: RegExp, text: string): boolean => {
     return matched;
 };
 
-export const hasUnsafeEditorialWorkflowIntent = (text: string, additionalPatterns: readonly RegExp[] = []): boolean => {
+export const hasUnsafeEditorialWorkflowIntent = (text: unknown, additionalPatterns: unknown = []): boolean => {
     const normalizedText = typeof text === "string" ? text : String(text);
     return (
         testUnsafePattern(unsafeEditorialActionPattern, normalizedText) ||
@@ -277,15 +277,15 @@ const requireWorkflowPhase = (phase: EditorialWorkflowPhase): EditorialWorkflowP
 };
 
 export const getEditorialWorkflowPhasePreset = (
-    phase: EditorialWorkflowPhase,
-    intent: EditorialWorkflowIntent = "article",
+    phase: unknown,
+    intent: unknown = "article",
 ): EditorialWorkflowPhasePreset => {
     const normalizedPhase = normalizeWorkflowPhase(phase);
     const normalizedIntent = normalizeIntent(intent);
     return mergePhasePreset(requireWorkflowPhase(normalizedPhase), intentPhaseOverrides[normalizedIntent]?.[normalizedPhase]);
 };
 
-export const createEditorialWorkflowPlan = (intent: EditorialWorkflowIntent = "article"): EditorialWorkflowPlan => {
+export const createEditorialWorkflowPlan = (intent: unknown = "article"): EditorialWorkflowPlan => {
     const normalizedIntent = normalizeIntent(intent);
     return Object.freeze({
         intent: normalizedIntent,
@@ -296,12 +296,12 @@ export const createEditorialWorkflowPlan = (intent: EditorialWorkflowIntent = "a
 const uniqueSpecialistIds = (skillIds: readonly EditorialSpecialistId[]): EditorialSpecialistId[] => [...new Set(skillIds)];
 
 export const getEditorialWorkflowSpecialistIds = (options: {
-    phase: EditorialWorkflowPhase;
-    intent?: EditorialWorkflowIntent;
+    phase: unknown;
+    intent?: unknown;
     task?: string;
     context?: string;
     includeSafetyForUnsafeIntent?: boolean;
-    additionalUnsafeIntentPatterns?: readonly RegExp[];
+    additionalUnsafeIntentPatterns?: unknown;
 }): readonly EditorialSpecialistId[] => {
     const phase = normalizeWorkflowPhase(options.phase);
     const intent = normalizeIntent(options.intent);
@@ -316,8 +316,8 @@ export const getEditorialWorkflowSpecialistIds = (options: {
 };
 
 export const createEditorialWorkflowConsultSummary = (
-    phase: EditorialWorkflowPhase,
-    intent: EditorialWorkflowIntent = "article",
+    phase: unknown,
+    intent: unknown = "article",
     specialistIds?: readonly EditorialSpecialistId[],
 ): EditorialWorkflowConsultSummary => {
     const normalizedPhase = normalizeWorkflowPhase(phase);
@@ -351,20 +351,21 @@ export const createEditorialWorkflowConsultRequest = (
 };
 
 export const createEditorialWorkflowPolicy = (options: {
-    phase?: EditorialWorkflowPhase;
-    intent?: EditorialWorkflowIntent;
+    phase?: unknown;
+    intent?: unknown;
     allowedCapabilities?: readonly EditorialSpecialistCapability[];
     deniedCapabilities?: readonly EditorialSpecialistCapability[];
-    maxHelpers?: number;
+    maxHelpers?: unknown;
     minConfidence?: number;
 } = {}): SpecialistPolicy<EditorialSpecialistCapability> => {
     const phase = options.phase === undefined ? undefined : normalizeWorkflowPhase(options.phase);
     const intent = normalizeIntent(options.intent);
     const defaultMaxHelpers = phase ? getEditorialWorkflowPhasePreset(phase, intent).defaultMaxHelpers : undefined;
+    const maxHelpers = options.maxHelpers === undefined ? defaultMaxHelpers : normalizeMaxHelpers(options.maxHelpers, defaultMaxHelpers ?? 2);
     return createEditorialSpecialistPolicy({
         allowedCapabilities: options.allowedCapabilities,
         deniedCapabilities: options.deniedCapabilities,
-        maxHelpers: options.maxHelpers ?? defaultMaxHelpers,
+        maxHelpers,
         minConfidence: options.minConfidence,
     });
 };
@@ -407,7 +408,7 @@ const createWorkflowToolParameters = () => ({
     },
 });
 
-const workflowToolRequestFromParams = (params: Record<string, unknown>, defaultIntent: EditorialWorkflowIntent): EditorialWorkflowConsultRequestOptions => ({
+const workflowToolRequestFromParams = (params: Record<string, unknown>, defaultIntent: unknown): EditorialWorkflowConsultRequestOptions => ({
     phase: normalizeWorkflowPhase(params.phase),
     task: typeof params.task === "string" ? params.task : "",
     ...(typeof params.context === "string" ? { context: params.context } : {}),

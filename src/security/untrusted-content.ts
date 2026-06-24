@@ -48,14 +48,14 @@ export type UntrustedContentEnvelope = Readonly<{
 }>;
 
 export type CreateUntrustedContentEnvelopeOptions = {
-    id?: string;
-    source: UntrustedContentSource;
-    label: string;
+    id?: unknown;
+    source?: unknown;
+    label?: unknown;
     content: unknown;
-    contentType?: UntrustedContentType;
+    contentType?: unknown;
     metadata?: Readonly<Record<string, unknown>>;
     detectPromptInjection?: boolean;
-    additionalPromptInjectionPatterns?: readonly PromptInjectionPatternInput[];
+    additionalPromptInjectionPatterns?: unknown;
 };
 
 export type UntrustedContentRenderOptions = {
@@ -63,7 +63,7 @@ export type UntrustedContentRenderOptions = {
     includeMetadata?: boolean;
     includeSignals?: boolean;
     redactSensitiveContent?: boolean;
-    additionalPromptInjectionPatterns?: readonly PromptInjectionPatternInput[];
+    additionalPromptInjectionPatterns?: unknown;
 };
 
 export type UntrustedContentRenderResult = Readonly<{
@@ -160,14 +160,14 @@ const slugPart = (value: string): string => value.toLowerCase().replace(/[^a-z0-
 const createEnvelopeId = (source: UntrustedContentSource, label: string, content: string): string =>
     `${source}:${slugPart(redactSensitiveText(label))}:${stableHash(redactSensitiveText(content))}`;
 
-const normalizeUntrustedContentSource = (source: UntrustedContentSource): UntrustedContentSource =>
-    (untrustedContentSourceValues as readonly string[]).includes(source) ? source : "unknown";
+const normalizeUntrustedContentSource = (source: unknown): UntrustedContentSource =>
+    typeof source === "string" && (untrustedContentSourceValues as readonly string[]).includes(source) ? source as UntrustedContentSource : "unknown";
 
-const normalizeUntrustedContentType = (contentType: UntrustedContentType | undefined): UntrustedContentType =>
-    contentType && (untrustedContentTypeValues as readonly string[]).includes(contentType) ? contentType : "unknown";
+const normalizeUntrustedContentType = (contentType: unknown): UntrustedContentType =>
+    typeof contentType === "string" && (untrustedContentTypeValues as readonly string[]).includes(contentType) ? contentType as UntrustedContentType : "unknown";
 
-const normalizePromptInjectionSignalKind = (kind: PromptInjectionSignalKind): PromptInjectionSignalKind =>
-    (promptInjectionSignalKindValues as readonly string[]).includes(kind) ? kind : "policy_bypass";
+const normalizePromptInjectionSignalKind = (kind: unknown): PromptInjectionSignalKind =>
+    typeof kind === "string" && (promptInjectionSignalKindValues as readonly string[]).includes(kind) ? kind as PromptInjectionSignalKind : "policy_bypass";
 
 const normalizeEnvelopeString = (value: unknown, fallback: string): string => {
     if (value === undefined || value === null) return fallback;
@@ -242,7 +242,7 @@ export const redactSensitiveText = (text: unknown): string => {
 
 export const detectPromptInjectionSignals = (
     content: unknown,
-    additionalPatterns: readonly PromptInjectionPatternInput[] = [],
+    additionalPatterns: unknown = [],
 ): PromptInjectionSignal[] => {
     const text = typeof content === "string" ? content : stringifyContent(content);
     const patterns = [...defaultPromptInjectionPatterns, ...normalizePromptInjectionPatterns(additionalPatterns)];
