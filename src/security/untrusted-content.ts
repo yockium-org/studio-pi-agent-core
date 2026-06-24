@@ -188,7 +188,7 @@ const testPattern = (pattern: RegExp, text: string): RegExpExecArray | null => {
     return match;
 };
 
-export const redactSensitiveText = (text: string): string => {
+export const redactSensitiveText = (text: unknown): string => {
     let redacted = typeof text === "string" ? text : stringifyContent(text);
     for (const { pattern, replacement } of sensitiveTextRedactions) {
         pattern.lastIndex = 0;
@@ -199,7 +199,7 @@ export const redactSensitiveText = (text: string): string => {
 };
 
 export const detectPromptInjectionSignals = (
-    content: string,
+    content: unknown,
     additionalPatterns: readonly PromptInjectionPattern[] = [],
 ): PromptInjectionSignal[] => {
     const text = typeof content === "string" ? content : stringifyContent(content);
