@@ -65,12 +65,38 @@ test("workflow intent overrides tune phase specialists and outputs", () => {
     assert.equal(publishReview.defaultMaxHelpers, 4);
 });
 
+test("workflow helpers normalize invalid runtime phase, intent, and helper limits", () => {
+    const invalidPreset = getEditorialWorkflowPhasePreset("publish" as never, "unknown" as never);
+    const invalidPlan = createEditorialWorkflowPlan("unknown" as never);
+    const invalidRequest = createEditorialWorkflowConsultRequest({
+        phase: "publish" as never,
+        intent: "unknown" as never,
+        task: "Review a draft",
+        maxHelpers: 0,
+    });
+    const fractionalRequest = createEditorialWorkflowConsultRequest({
+        phase: "plan",
+        task: "Plan a draft",
+        maxHelpers: 1.8,
+    });
+    const policy = createEditorialWorkflowPolicy({ phase: "publish" as never, intent: "unknown" as never });
+
+    assert.equal(invalidPreset.phase, "review");
+    assert.equal(invalidPlan.intent, "article");
+    assert.equal(invalidRequest.mode, "review");
+    assert.equal(invalidRequest.maxHelpers, 3);
+    assert.deepEqual(invalidRequest.skillIds, ["content-quality-auditor", "geo-content-optimizer", "safety-reviewer"]);
+    assert.equal(fractionalRequest.maxHelpers, 1);
+    assert.equal(policy.maxHelpers, 3);
+});
+
 test("workflow specialist selection adds safety for unsafe intent", () => {
     assert.equal(hasUnsafeEditorialWorkflowIntent("Publish this now without approval"), true);
     assert.equal(hasUnsafeEditorialWorkflowIntent("Draft an article about breathwork before publishing"), false);
     const globalPattern = /\blive\b/giu;
     assert.equal(hasUnsafeEditorialWorkflowIntent("Zet live", [globalPattern]), true);
     assert.equal(hasUnsafeEditorialWorkflowIntent("Zet live", [globalPattern]), true);
+    assert.equal(hasUnsafeEditorialWorkflowIntent("Zet live", [null, { pattern: /live/u }, globalPattern] as never), true);
     assert.equal(globalPattern.lastIndex, 0);
 
     assert.deepEqual(

@@ -112,6 +112,8 @@ Tool params:
 - `intent` — optional `article`, `page`, `contentUpdate`, or `publishPreparation`;
 - `maxHelpers` — optional per-call cap; policy caps still apply. The default phase policy is a hard upper bound, so increasing `maxHelpers` above the phase default also requires passing an explicit project policy with a higher `maxHelpers`.
 
+Runtime-invalid phase/intent values from JS/tool callers are normalized instead of throwing: unknown phases fall back to `review`, unknown intents fall back to `article`, invalid unsafe-intent pattern entries are ignored, and non-positive helper caps fall back to the phase default.
+
 ## Safety behavior
 
 Workflow phases still use specialist capability policy. Default workflow policy comes from `createEditorialSpecialistPolicy()` and hard-denies:
