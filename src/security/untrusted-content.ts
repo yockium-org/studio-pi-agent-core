@@ -131,7 +131,7 @@ const safeStringify = (value: unknown): string => {
                     seen.add(nestedValue);
                     if (nestedValue instanceof Set) return [...nestedValue.values()];
                     if (nestedValue instanceof Map) {
-                        const mapped: Record<string, unknown> = {};
+                        const mapped = Object.create(null) as Record<string, unknown>;
                         for (const [key, mapValue] of nestedValue.entries()) mapped[stringifyMapKey(key)] = mapValue;
                         return mapped;
                     }
@@ -207,13 +207,13 @@ const cloneMetadataValue = (value: unknown, seen = new WeakMap<object, unknown>(
     }
 
     if (value instanceof Map) {
-        const clone: Record<string, unknown> = {};
+        const clone = Object.create(null) as Record<string, unknown>;
         seen.set(value, clone);
         for (const [key, nestedValue] of value.entries()) clone[stringifyMapKey(key)] = cloneMetadataValue(nestedValue, seen);
         return Object.freeze(clone);
     }
 
-    const clone: Record<string, unknown> = {};
+    const clone = Object.create(null) as Record<string, unknown>;
     seen.set(value, clone);
     for (const [key, nestedValue] of Object.entries(value)) clone[key] = cloneMetadataValue(nestedValue, seen);
     return Object.freeze(clone);
@@ -223,7 +223,9 @@ const cloneMetadata = (metadata: unknown): Readonly<Record<string, unknown>> | u
     if (metadata === undefined || metadata === null) return undefined;
     const snapshot = cloneMetadataValue(metadata);
     if (snapshot && typeof snapshot === "object" && !Array.isArray(snapshot)) return snapshot as Readonly<Record<string, unknown>>;
-    return Object.freeze({ value: snapshot });
+    const wrapped = Object.create(null) as Record<string, unknown>;
+    wrapped.value = snapshot;
+    return Object.freeze(wrapped);
 };
 
 const createGlobalPattern = (pattern: RegExp): RegExp =>

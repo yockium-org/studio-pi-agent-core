@@ -215,6 +215,27 @@ test("createUntrustedContentEnvelope preserves JSON-friendly special metadata va
     assert.match(rendered.text, /"topic": "breathwork"/u);
 });
 
+test("createUntrustedContentEnvelope preserves untrusted prototype-like keys as data", () => {
+    const metadata = Object.create(null) as Record<string, unknown>;
+    metadata["__proto__"] = { polluted: true };
+    metadata["constructor"] = "cms-constructor";
+
+    const envelope = createUntrustedContentEnvelope({
+        source: "cms",
+        label: "Prototype metadata",
+        content: new Map<unknown, unknown>([["__proto__", "content-prototype"]]),
+        metadata,
+    });
+    const rendered = renderUntrustedContentForModel(envelope);
+
+    assert.equal(({} as Record<string, unknown>).polluted, undefined);
+    assert.match(envelope.content, /"__proto__": "content-prototype"/u);
+    assert.equal(Object.getPrototypeOf(envelope.metadata), null);
+    assert.match(rendered.text, /"__proto__": \{/u);
+    assert.match(rendered.text, /"polluted": true/u);
+    assert.match(rendered.text, /"constructor": "cms-constructor"/u);
+});
+
 test("createUntrustedContentEnvelope normalizes runtime metadata roots", () => {
     const mapEnvelope = createUntrustedContentEnvelope({
         source: "tool",
