@@ -274,8 +274,13 @@ export const detectPromptInjectionSignals = (
     return signals;
 };
 
+const envelopeOptionKeys = ["id", "source", "label", "content", "contentType", "metadata", "detectPromptInjection", "additionalPromptInjectionPatterns"] as const;
+
+const isEnvelopeOptionsObject = (value: object): boolean =>
+    envelopeOptionKeys.some((key) => Object.prototype.hasOwnProperty.call(value, key));
+
 const normalizeEnvelopeOptions = (options: unknown): CreateUntrustedContentEnvelopeOptions =>
-    options && typeof options === "object" ? options as CreateUntrustedContentEnvelopeOptions : { content: options };
+    options && typeof options === "object" && isEnvelopeOptionsObject(options) ? options as CreateUntrustedContentEnvelopeOptions : { content: options };
 
 export function createUntrustedContentEnvelope(options: CreateUntrustedContentEnvelopeOptions): UntrustedContentEnvelope;
 export function createUntrustedContentEnvelope(options?: unknown): UntrustedContentEnvelope;
