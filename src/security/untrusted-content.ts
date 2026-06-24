@@ -207,7 +207,7 @@ export const detectPromptInjectionSignals = (
     const signals: PromptInjectionSignal[] = [];
     for (const { kind, pattern } of patterns) {
         const match = testPattern(pattern, text);
-        if (match?.[0]) signals.push({ kind: normalizePromptInjectionSignalKind(kind), match: redactSensitiveText(match[0]), index: match.index });
+        if (match?.[0]) signals.push({ kind: normalizePromptInjectionSignalKind(kind), match: sanitizeDiagnosticMatch(match[0]), index: match.index });
     }
     return signals;
 };
@@ -239,9 +239,11 @@ const truncateContent = (content: string, maxLength: number): { content: string;
     return { content: `${content.slice(0, Math.max(0, maxLength - 1))}…`, truncated: true };
 };
 
+const normalizeLineBreaks = (content: string): string => content.replace(/\r\n?/gu, "\n").replace(/[\u2028\u2029]/gu, "\n");
+
 const prepareHeaderValue = (value: string, maxLength = 200): { value: string; redacted: boolean } => {
     const redactedValue = redactSensitiveText(value);
-    const sanitized = redactedValue.replace(/[\u0000-\u001f\u007f]+/gu, " ").replace(/\s+/gu, " ").trim();
+    const sanitized = normalizeLineBreaks(redactedValue).replace(/[\u0000-\u001f\u007f]+/gu, " ").replace(/\s+/gu, " ").trim();
     return {
         value: sanitized.length > maxLength ? `${sanitized.slice(0, Math.max(0, maxLength - 1))}…` : sanitized,
         redacted: redactedValue !== value,
@@ -250,7 +252,7 @@ const prepareHeaderValue = (value: string, maxLength = 200): { value: string; re
 
 const sanitizeHeaderValue = (value: string, maxLength = 200): string => prepareHeaderValue(value, maxLength).value;
 
-const normalizeLineBreaks = (content: string): string => content.replace(/\r\n?/gu, "\n").replace(/[\u2028\u2029]/gu, "\n");
+const sanitizeDiagnosticMatch = (match: unknown): string => prepareHeaderValue(redactSensitiveText(match), 500).value || "[empty]";
 
 const quoteUntrustedLines = (content: string): string => normalizeLineBreaks(content).split("\n").map((line) => `> ${line}`).join("\n");
 
@@ -274,10 +276,9 @@ const normalizePromptInjectionSignal = (signal: PromptInjectionSignal | unknown)
     const candidate = signal as Partial<PromptInjectionSignal>;
     if (candidate.match === undefined) return undefined;
     const rawIndex = typeof candidate.index === "number" && Number.isFinite(candidate.index) ? Math.max(0, Math.trunc(candidate.index)) : 0;
-    const rawMatch = stringifyContent(candidate.match);
     return Object.freeze({
         kind: normalizePromptInjectionSignalKind(candidate.kind as PromptInjectionSignalKind),
-        match: redactSensitiveText(rawMatch),
+        match: sanitizeDiagnosticMatch(candidate.match),
         index: rawIndex,
     });
 };
