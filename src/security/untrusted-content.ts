@@ -51,7 +51,7 @@ export type CreateUntrustedContentEnvelopeOptions = {
     id?: unknown;
     source?: unknown;
     label?: unknown;
-    content: unknown;
+    content?: unknown;
     contentType?: unknown;
     metadata?: unknown;
     detectPromptInjection?: boolean;
@@ -274,16 +274,22 @@ export const detectPromptInjectionSignals = (
     return signals;
 };
 
-export const createUntrustedContentEnvelope = (options: CreateUntrustedContentEnvelopeOptions): UntrustedContentEnvelope => {
-    const source = normalizeUntrustedContentSource(options.source);
-    const contentType = normalizeUntrustedContentType(options.contentType ?? "text");
-    const label = normalizeEnvelopeString(options.label, "Untrusted content");
-    const id = options.id === undefined ? undefined : normalizeEnvelopeString(options.id, "");
-    const content = stringifyContent(options.content);
-    const promptInjectionSignals = options.detectPromptInjection === false
+const normalizeEnvelopeOptions = (options: unknown): CreateUntrustedContentEnvelopeOptions =>
+    options && typeof options === "object" ? options as CreateUntrustedContentEnvelopeOptions : { content: options };
+
+export function createUntrustedContentEnvelope(options: CreateUntrustedContentEnvelopeOptions): UntrustedContentEnvelope;
+export function createUntrustedContentEnvelope(options?: unknown): UntrustedContentEnvelope;
+export function createUntrustedContentEnvelope(options?: unknown): UntrustedContentEnvelope {
+    const normalizedOptions = normalizeEnvelopeOptions(options);
+    const source = normalizeUntrustedContentSource(normalizedOptions.source);
+    const contentType = normalizeUntrustedContentType(normalizedOptions.contentType ?? "text");
+    const label = normalizeEnvelopeString(normalizedOptions.label, "Untrusted content");
+    const id = normalizedOptions.id === undefined ? undefined : normalizeEnvelopeString(normalizedOptions.id, "");
+    const content = stringifyContent(normalizedOptions.content);
+    const promptInjectionSignals = normalizedOptions.detectPromptInjection === false
         ? []
-        : detectPromptInjectionSignals(content, options.additionalPromptInjectionPatterns);
-    const metadata = cloneMetadata(options.metadata);
+        : detectPromptInjectionSignals(content, normalizedOptions.additionalPromptInjectionPatterns);
+    const metadata = cloneMetadata(normalizedOptions.metadata);
 
     return Object.freeze({
         id: id || createEnvelopeId(source, label, content),
@@ -294,7 +300,7 @@ export const createUntrustedContentEnvelope = (options: CreateUntrustedContentEn
         ...(metadata ? { metadata } : {}),
         promptInjectionSignals: Object.freeze(promptInjectionSignals.map((signal) => Object.freeze({ ...signal }))),
     });
-};
+}
 
 const truncateContent = (content: string, maxLength: number): { content: string; truncated: boolean } => {
     if (!Number.isFinite(maxLength) || maxLength <= 0) return { content: "", truncated: content.length > 0 };
