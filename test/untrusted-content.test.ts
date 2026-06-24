@@ -35,15 +35,17 @@ test("untrusted content constants are frozen public values", () => {
 
 test("redactSensitiveText removes common secret shapes", () => {
     const redacted = redactSensitiveText(
-        "api_key=abc123 token: xyz789 secret: 'two word secret' Bearer abcdefghijklmnopqrstuvwxyz sk-1234567890abcdef {\"password\": \"json secret\"}",
+        "api_key=abc123 token: xyz789 secret: 'two word secret' Bearer abcdefghijklmnopqrstuvwxyz sk-1234567890abcdef ghp_abcdefghijklmnopqrstuvwxyz123456 github_pat_11ABCDEFGabcdefghijklmnopqrstuvwxyz1234567890 {\"password\": \"json secret\"}",
     );
+    const privateKeyRedacted = redactSensitiveText("-----BEGIN PRIVATE KEY-----\nabc123\ndef456\n-----END PRIVATE KEY-----");
 
     assert.match(redacted, /api_key=\[REDACTED\]/u);
     assert.match(redacted, /token: \[REDACTED\]/u);
     assert.match(redacted, /Bearer \[REDACTED\]/u);
     assert.match(redacted, /secret: '\[REDACTED\]'/u);
     assert.match(redacted, /"password": "\[REDACTED\]"/u);
-    assert.doesNotMatch(redacted, /sk-1234567890abcdef|two word secret|json secret/u);
+    assert.match(privateKeyRedacted, /^\[REDACTED\]$/u);
+    assert.doesNotMatch(redacted, /sk-1234567890abcdef|ghp_abcdefghijklmnopqrstuvwxyz123456|github_pat_11ABCDEFGabcdefghijklmnopqrstuvwxyz1234567890|two word secret|json secret/u);
 
     const regexLiteralRedacted = redactSensitiveText('{"pattern": "/token=\\\\S+/iu"}');
     assert.match(regexLiteralRedacted, /"pattern": "\/token=\[REDACTED\]"/u);

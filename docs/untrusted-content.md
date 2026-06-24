@@ -111,8 +111,10 @@ Patterns are tested with `lastIndex` reset before and after matching, so global/
 
 By default, rendering redacts common secret shapes in content, metadata, rendered IDs/labels, and signal diagnostics, such as:
 
+- PEM private-key blocks;
 - `Bearer ...`;
 - `sk-...`;
+- GitHub-style `ghp_...` / `github_pat_...` tokens;
 - Slack-style `xox...` tokens;
 - `api_key=...`, `token=...`, `secret=...`, `password=...`.
 

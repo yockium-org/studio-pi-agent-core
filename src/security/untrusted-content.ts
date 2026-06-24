@@ -77,8 +77,11 @@ const defaultMaxContentLength = 12_000;
 const defaultMaxPromptInjectionSignals = 20;
 
 const sensitiveTextRedactions = [
+    { pattern: /-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z0-9 ]*PRIVATE KEY-----/giu, replacement: "[REDACTED]" },
     { pattern: /\b(Bearer\s+)[A-Za-z0-9._~+\-/]+=*/giu, replacement: "$1[REDACTED]" },
     { pattern: /\bsk-[A-Za-z0-9_-]{12,}\b/giu, replacement: "[REDACTED]" },
+    { pattern: /\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{20,}\b/giu, replacement: "[REDACTED]" },
+    { pattern: /\bgithub_pat_[A-Za-z0-9_]{20,}\b/giu, replacement: "[REDACTED]" },
     { pattern: /\bxox[baprs]-[A-Za-z0-9-]{12,}\b/giu, replacement: "[REDACTED]" },
     {
         pattern: /(^|[^\p{L}\p{N}_-])(["']?(?:api[_-]?key|token|secret|password)["']?\s*[:=]\s*)(["'])([^"']*)\3/giu,
