@@ -99,9 +99,23 @@ const defaultPromptInjectionPatterns = [
     { kind: "role_confusion", pattern: /\b(act\s+as|you\s+are\s+now|pretend\s+to\s+be)\s+(a\s+)?(system|developer|admin|root)\b/iu },
 ] as const satisfies readonly PromptInjectionPattern[];
 
+const stringifyMapKey = (key: unknown): string => {
+    if (typeof key === "string") return key;
+    if (typeof key === "number" || typeof key === "boolean" || typeof key === "bigint" || typeof key === "symbol") return String(key);
+    if (key === undefined) return "undefined";
+    if (key === null) return "null";
+    if (key instanceof Date) return Number.isNaN(key.getTime()) ? key.toString() : key.toISOString();
+    if (key instanceof RegExp) return key.toString();
+    if (typeof URL !== "undefined" && key instanceof URL) return key.toString();
+    return Object.prototype.toString.call(key);
+};
+
 const safeStringify = (value: unknown): string => {
     if (typeof value === "string") return value;
     if (value === undefined) return "undefined";
+    if (value instanceof Date) return Number.isNaN(value.getTime()) ? value.toString() : value.toISOString();
+    if (value instanceof RegExp) return value.toString();
+    if (typeof URL !== "undefined" && value instanceof URL) return value.toString();
 
     const seen = new WeakSet<object>();
     try {
@@ -109,9 +123,17 @@ const safeStringify = (value: unknown): string => {
             value,
             (_key, nestedValue) => {
                 if (typeof nestedValue === "bigint") return String(nestedValue);
+                if (nestedValue instanceof RegExp) return nestedValue.toString();
+                if (typeof URL !== "undefined" && nestedValue instanceof URL) return nestedValue.toString();
                 if (typeof nestedValue === "object" && nestedValue !== null) {
                     if (seen.has(nestedValue)) return "[Circular]";
                     seen.add(nestedValue);
+                    if (nestedValue instanceof Set) return [...nestedValue.values()];
+                    if (nestedValue instanceof Map) {
+                        const mapped: Record<string, unknown> = {};
+                        for (const [key, mapValue] of nestedValue.entries()) mapped[stringifyMapKey(key)] = mapValue;
+                        return mapped;
+                    }
                 }
                 return nestedValue;
             },
@@ -186,7 +208,7 @@ const cloneMetadataValue = (value: unknown, seen = new WeakMap<object, unknown>(
     if (value instanceof Map) {
         const clone: Record<string, unknown> = {};
         seen.set(value, clone);
-        for (const [key, nestedValue] of value.entries()) clone[stringifyContent(key)] = cloneMetadataValue(nestedValue, seen);
+        for (const [key, nestedValue] of value.entries()) clone[stringifyMapKey(key)] = cloneMetadataValue(nestedValue, seen);
         return Object.freeze(clone);
     }
 
