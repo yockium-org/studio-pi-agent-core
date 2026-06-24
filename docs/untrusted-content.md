@@ -115,7 +115,7 @@ By default, rendering redacts common secret shapes in content, metadata, rendere
 - Slack-style `xox...` tokens;
 - `api_key=...`, `token=...`, `secret=...`, `password=...`.
 
-Runtime non-string values passed to public redaction/signal helpers are safely stringified before scanning, matching envelope behavior.
+Runtime non-string values passed to public redaction/signal helpers are safely stringified before scanning, matching envelope behavior. Rendering/result helpers also normalize manually supplied envelope content and signal diagnostics so JS callers are not required to construct perfect TypeScript-shaped envelopes.
 
 Rendering also truncates content to `12_000` characters by default. Configure with:
 

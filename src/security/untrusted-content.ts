@@ -267,16 +267,33 @@ const renderSignals = (signals: readonly PromptInjectionSignal[]): string[] => {
     ];
 };
 
-const prepareSignalsForRendering = (signals: readonly PromptInjectionSignal[], redactMatches: boolean): readonly PromptInjectionSignal[] =>
-    Object.freeze(
-        signals.map((signal) =>
-            Object.freeze({
-                ...signal,
-                kind: normalizePromptInjectionSignalKind(signal.kind),
-                match: redactMatches ? redactSensitiveText(signal.match) : signal.match,
-            }),
-        ),
-    );
+const normalizePromptInjectionSignal = (signal: PromptInjectionSignal | unknown, redactMatch: boolean): PromptInjectionSignal | undefined => {
+    if (!signal || typeof signal !== "object") return undefined;
+    const candidate = signal as Partial<PromptInjectionSignal>;
+    if (candidate.match === undefined) return undefined;
+    const rawIndex = typeof candidate.index === "number" && Number.isFinite(candidate.index) ? Math.max(0, Math.trunc(candidate.index)) : 0;
+    const rawMatch = stringifyContent(candidate.match);
+    const match = redactMatch ? redactSensitiveText(rawMatch) : rawMatch;
+    return Object.freeze({
+        kind: normalizePromptInjectionSignalKind(candidate.kind as PromptInjectionSignalKind),
+        match,
+        index: rawIndex,
+    });
+};
+
+const normalizePromptInjectionSignals = (signals: readonly PromptInjectionSignal[] | unknown, redactMatches: boolean): readonly PromptInjectionSignal[] =>
+    Object.freeze(Array.isArray(signals) ? signals.flatMap((signal) => normalizePromptInjectionSignal(signal, redactMatches) ?? []) : []);
+
+const hasRedactedSignalMatches = (signals: readonly PromptInjectionSignal[] | unknown, redactMatches: boolean): boolean =>
+    redactMatches &&
+    Array.isArray(signals) &&
+    signals.some((signal) => {
+        if (!signal || typeof signal !== "object") return false;
+        const candidate = signal as Partial<PromptInjectionSignal>;
+        if (candidate.match === undefined) return false;
+        const rawMatch = stringifyContent(candidate.match);
+        return redactSensitiveText(rawMatch) !== rawMatch;
+    });
 
 export const renderUntrustedContentForModel = (
     envelope: UntrustedContentEnvelope,
@@ -286,14 +303,15 @@ export const renderUntrustedContentForModel = (
     const shouldRedactSensitiveContent = options.redactSensitiveContent !== false;
     const source = normalizeUntrustedContentSource(envelope.source);
     const contentType = normalizeUntrustedContentType(envelope.contentType);
-    const contentBeforeRedaction = envelope.content;
+    const contentBeforeRedaction = stringifyContent(envelope.content);
     const contentAfterRedaction = shouldRedactSensitiveContent ? redactSensitiveText(contentBeforeRedaction) : contentBeforeRedaction;
     const { content, truncated } = truncateContent(contentAfterRedaction, maxContentLength);
-    const additionalSignals = detectPromptInjectionSignals(envelope.content, options.additionalPromptInjectionPatterns);
+    const additionalSignals = detectPromptInjectionSignals(contentBeforeRedaction, options.additionalPromptInjectionPatterns);
     const signalKey = (signal: PromptInjectionSignal) => `${signal.kind}:${signal.index}:${signal.match}`;
-    const signals = [...new Map([...envelope.promptInjectionSignals, ...additionalSignals].map((signal) => [signalKey(signal), signal])).values()];
-    const renderedSignals = prepareSignalsForRendering(signals, shouldRedactSensitiveContent);
-    const redactedSignals = renderedSignals.some((signal, index) => signal.match !== signals[index]?.match);
+    const envelopeSignals = normalizePromptInjectionSignals(envelope.promptInjectionSignals, shouldRedactSensitiveContent);
+    const signals = [...new Map([...envelopeSignals, ...additionalSignals].map((signal) => [signalKey(signal), signal])).values()];
+    const renderedSignals = Object.freeze(signals.map((signal) => Object.freeze({ ...signal })));
+    const redactedSignals = hasRedactedSignalMatches(envelope.promptInjectionSignals, shouldRedactSensitiveContent);
     const metadata = options.includeMetadata === false ? { lines: [], redacted: false } : renderMetadata(envelope.metadata);
     const renderedId = prepareHeaderValue(envelope.id);
     const renderedLabel = prepareHeaderValue(envelope.label);
