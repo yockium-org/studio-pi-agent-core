@@ -116,7 +116,7 @@ By default, rendering redacts common secret shapes in content, metadata, rendere
 - Slack-style `xox...` tokens;
 - `api_key=...`, `token=...`, `secret=...`, `password=...`.
 
-Public redaction/signal helpers accept unknown content values and safely stringify non-string input before scanning, matching envelope behavior. Rendering/result helpers also accept unknown runtime envelope values, normalize manually supplied envelope content and signal diagnostics, and fall back to `unknown` / `Untrusted content` for missing envelope objects, so JS callers are not required to construct perfect TypeScript-shaped envelopes. Signal diagnostics remain redacted even if a caller disables body redaction with `redactSensitiveContent: false`.
+Public redaction/signal helpers accept unknown content values and safely stringify non-string input before scanning, matching envelope behavior. Rendering/result helpers also accept unknown runtime envelope values, normalize manually supplied envelope content and signal diagnostics, and fall back to `unknown` / `Untrusted content` for missing envelope objects, so JS callers are not required to construct perfect TypeScript-shaped envelopes. Metadata is snapshotted into JSON-friendly values, including Date, URL, RegExp, Set, and Map values. Signal diagnostics remain redacted even if a caller disables body redaction with `redactSensitiveContent: false`.
 
 Rendering also truncates content to `12_000` characters by default. Configure with:
 

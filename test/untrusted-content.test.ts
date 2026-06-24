@@ -44,6 +44,10 @@ test("redactSensitiveText removes common secret shapes", () => {
     assert.match(redacted, /secret: '\[REDACTED\]'/u);
     assert.match(redacted, /"password": "\[REDACTED\]"/u);
     assert.doesNotMatch(redacted, /sk-1234567890abcdef|two word secret|json secret/u);
+
+    const regexLiteralRedacted = redactSensitiveText('{"pattern": "/token=\\\\S+/iu"}');
+    assert.match(regexLiteralRedacted, /"pattern": "\/token=\[REDACTED\]"/u);
+    assert.match(regexLiteralRedacted, /"\}$/u);
 });
 
 test("redaction and signal helpers accept non-string content input", () => {
@@ -142,6 +146,29 @@ test("createUntrustedContentEnvelope preserves cyclic and BigInt content markers
 
     assert.match(envelope.content, /"count": "1"/u);
     assert.match(envelope.content, /"self": "\[Circular\]"/u);
+});
+
+test("createUntrustedContentEnvelope preserves JSON-friendly special metadata values", () => {
+    const envelope = createUntrustedContentEnvelope({
+        source: "cms",
+        label: "Special metadata",
+        content: "body",
+        metadata: {
+            publishedAt: new Date("2026-06-24T12:00:00.000Z"),
+            pattern: /breathwork/iu,
+            url: new URL("https://example.com/articles/breathwork"),
+            tags: new Set(["breathing", "pranayama"]),
+            relations: new Map([["topic", "breathwork"]]),
+        },
+    });
+
+    const rendered = renderUntrustedContentForModel(envelope);
+
+    assert.match(rendered.text, /"publishedAt": "2026-06-24T12:00:00.000Z"/u);
+    assert.match(rendered.text, /"pattern": "\/breathwork\/iu"/u);
+    assert.match(rendered.text, /"url": "https:\/\/example.com\/articles\/breathwork"/u);
+    assert.match(rendered.text, /"breathing"/u);
+    assert.match(rendered.text, /"topic": "breathwork"/u);
 });
 
 test("createUntrustedContentEnvelope snapshots and freezes nested metadata", () => {

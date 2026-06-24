@@ -84,7 +84,7 @@ const sensitiveTextRedactions = [
         replacement: "$1$2$3[REDACTED]$3",
     },
     {
-        pattern: /(^|[^\p{L}\p{N}_-])(["']?(?:api[_-]?key|token|secret|password)["']?\s*[:=]\s*)(?!["'])([^\s,}]+)/giu,
+        pattern: /(^|[^\p{L}\p{N}_-])(["']?(?:api[_-]?key|token|secret|password)["']?\s*[:=]\s*)(?!["'])([^"'\s,}]+)/giu,
         replacement: "$1$2[REDACTED]",
     },
 ] as const;
@@ -164,12 +164,29 @@ const normalizePromptInjectionPatterns = (patterns: readonly PromptInjectionPatt
 
 const cloneMetadataValue = (value: unknown, seen = new WeakMap<object, unknown>()): unknown => {
     if (typeof value !== "object" || value === null) return value;
+    if (value instanceof Date) return Number.isNaN(value.getTime()) ? value.toString() : value.toISOString();
+    if (value instanceof RegExp) return value.toString();
+    if (typeof URL !== "undefined" && value instanceof URL) return value.toString();
     if (seen.has(value)) return seen.get(value);
 
     if (Array.isArray(value)) {
         const clone: unknown[] = [];
         seen.set(value, clone);
         for (const item of value) clone.push(cloneMetadataValue(item, seen));
+        return Object.freeze(clone);
+    }
+
+    if (value instanceof Set) {
+        const clone: unknown[] = [];
+        seen.set(value, clone);
+        for (const item of value) clone.push(cloneMetadataValue(item, seen));
+        return Object.freeze(clone);
+    }
+
+    if (value instanceof Map) {
+        const clone: Record<string, unknown> = {};
+        seen.set(value, clone);
+        for (const [key, nestedValue] of value.entries()) clone[stringifyContent(key)] = cloneMetadataValue(nestedValue, seen);
         return Object.freeze(clone);
     }
 
