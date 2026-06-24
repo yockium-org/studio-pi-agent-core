@@ -388,12 +388,24 @@ test("renderUntrustedContentForModel reports redacted signal diagnostics when co
         content: "token=super-secret-value",
         additionalPromptInjectionPatterns: [secretSignalPattern],
     });
+    const runtimeEnvelope = {
+        id: "runtime-signal-redaction",
+        source: "tool",
+        label: "Runtime signal redaction",
+        content: "body",
+        contentType: "text",
+        promptInjectionSignals: [{ kind: "secret_exfiltration", match: "token=runtime-secret", index: 0 }],
+    } as any;
 
     const rendered = renderUntrustedContentForModel(envelope, { redactSensitiveContent: false });
+    const runtimeRendered = renderUntrustedContentForModel(runtimeEnvelope, { redactSensitiveContent: false });
 
     assert.equal(rendered.redacted, true);
     assert.match(rendered.text, /> token=super-secret-value/u);
     assert(rendered.promptInjectionSignals.some((signal) => signal.match === "token=[REDACTED]"));
+    assert.equal(runtimeRendered.redacted, true);
+    assert(runtimeRendered.promptInjectionSignals.some((signal) => signal.match === "token=[REDACTED]"));
+    assert.doesNotMatch(runtimeRendered.text, /runtime-secret/u);
 });
 
 test("detectPromptInjectionSignals normalizes invalid runtime signal kinds", () => {

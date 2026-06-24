@@ -269,25 +269,23 @@ const renderSignals = (signals: readonly PromptInjectionSignal[]): string[] => {
     ];
 };
 
-const normalizePromptInjectionSignal = (signal: PromptInjectionSignal | unknown, redactMatch: boolean): PromptInjectionSignal | undefined => {
+const normalizePromptInjectionSignal = (signal: PromptInjectionSignal | unknown): PromptInjectionSignal | undefined => {
     if (!signal || typeof signal !== "object") return undefined;
     const candidate = signal as Partial<PromptInjectionSignal>;
     if (candidate.match === undefined) return undefined;
     const rawIndex = typeof candidate.index === "number" && Number.isFinite(candidate.index) ? Math.max(0, Math.trunc(candidate.index)) : 0;
     const rawMatch = stringifyContent(candidate.match);
-    const match = redactMatch ? redactSensitiveText(rawMatch) : rawMatch;
     return Object.freeze({
         kind: normalizePromptInjectionSignalKind(candidate.kind as PromptInjectionSignalKind),
-        match,
+        match: redactSensitiveText(rawMatch),
         index: rawIndex,
     });
 };
 
-const normalizePromptInjectionSignals = (signals: readonly PromptInjectionSignal[] | unknown, redactMatches: boolean): readonly PromptInjectionSignal[] =>
-    Object.freeze(Array.isArray(signals) ? signals.flatMap((signal) => normalizePromptInjectionSignal(signal, redactMatches) ?? []) : []);
+const normalizePromptInjectionSignals = (signals: readonly PromptInjectionSignal[] | unknown): readonly PromptInjectionSignal[] =>
+    Object.freeze(Array.isArray(signals) ? signals.flatMap((signal) => normalizePromptInjectionSignal(signal) ?? []) : []);
 
-const hasRedactedSignalMatches = (signals: readonly PromptInjectionSignal[] | unknown, redactMatches: boolean): boolean =>
-    redactMatches &&
+const hasRedactedSignalMatches = (signals: readonly PromptInjectionSignal[] | unknown): boolean =>
     Array.isArray(signals) &&
     signals.some((signal) => {
         if (!signal || typeof signal !== "object") return false;
@@ -336,10 +334,10 @@ export const renderUntrustedContentForModel = (
     const { content, truncated } = truncateContent(contentAfterRedaction, maxContentLength);
     const additionalSignals = detectPromptInjectionSignals(contentBeforeRedaction, options.additionalPromptInjectionPatterns);
     const signalKey = (signal: PromptInjectionSignal) => `${signal.kind}:${signal.index}:${signal.match}`;
-    const envelopeSignals = normalizePromptInjectionSignals(normalizedEnvelope.promptInjectionSignals, shouldRedactSensitiveContent);
+    const envelopeSignals = normalizePromptInjectionSignals(normalizedEnvelope.promptInjectionSignals);
     const signals = [...new Map([...envelopeSignals, ...additionalSignals].map((signal) => [signalKey(signal), signal])).values()];
     const renderedSignals = Object.freeze(signals.map((signal) => Object.freeze({ ...signal })));
-    const redactedSignals = hasRedactedSignalMatches(normalizedEnvelope.promptInjectionSignals, shouldRedactSensitiveContent);
+    const redactedSignals = hasRedactedSignalMatches(normalizedEnvelope.promptInjectionSignals);
     const redactedSignalDiagnostics = redactedSignals || renderedSignals.some((signal) => signal.match.includes("[REDACTED]"));
     const metadata = options.includeMetadata === false ? { lines: [], redacted: false } : renderMetadata(normalizedEnvelope.metadata);
     const renderedId = prepareHeaderValue(normalizedEnvelope.id);
