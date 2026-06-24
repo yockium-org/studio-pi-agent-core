@@ -14,6 +14,10 @@ Adds phase-aware editorial workflow helpers and untrusted-content / prompt-injec
 - `detectPromptInjectionSignals` and `promptInjectionSignalKinds` for common instruction-override, secret-exfiltration, tool-use, policy-bypass, and role-confusion signals;
 - `redactSensitiveText` for common token/API key/secret shapes before model rendering;
 - `createUntrustedContentResult` for Pi-compatible tool results that preserve guard metadata;
+- runtime hardening for invalid workflow phase/intent/helper inputs, invalid untrusted source/type/id/label values, malformed prompt-signal diagnostics, and missing/non-options-shaped envelope inputs;
+- safe stringification for cyclic, BigInt, Date, URL, RegExp, Set, Map, primitive metadata roots, and prototype-like metadata keys without mutating object prototypes;
+- bounded repeated prompt-injection diagnostics with redacted single-line matches and stateless RegExp handling;
+- packed-package smoke coverage for runtime imports and TypeScript declarations of the new workflow/guard APIs;
 - `docs/editorial-workflow.md` with the intended writing/review/prepare flow;
 - `docs/untrusted-content.md` with integration guidance for CMS reads, specialists, and future prepare/apply flows.
 
