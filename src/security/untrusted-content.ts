@@ -53,7 +53,7 @@ export type CreateUntrustedContentEnvelopeOptions = {
     label?: unknown;
     content: unknown;
     contentType?: unknown;
-    metadata?: Readonly<Record<string, unknown>>;
+    metadata?: unknown;
     detectPromptInjection?: boolean;
     additionalPromptInjectionPatterns?: unknown;
 };
@@ -218,9 +218,11 @@ const cloneMetadataValue = (value: unknown, seen = new WeakMap<object, unknown>(
     return Object.freeze(clone);
 };
 
-const cloneMetadata = (metadata: Readonly<Record<string, unknown>> | undefined): Readonly<Record<string, unknown>> | undefined => {
-    if (!metadata) return undefined;
-    return cloneMetadataValue(metadata) as Readonly<Record<string, unknown>>;
+const cloneMetadata = (metadata: unknown): Readonly<Record<string, unknown>> | undefined => {
+    if (metadata === undefined || metadata === null) return undefined;
+    const snapshot = cloneMetadataValue(metadata);
+    if (snapshot && typeof snapshot === "object" && !Array.isArray(snapshot)) return snapshot as Readonly<Record<string, unknown>>;
+    return Object.freeze({ value: snapshot });
 };
 
 const testPattern = (pattern: RegExp, text: string): RegExpExecArray | null => {
@@ -263,6 +265,7 @@ export const createUntrustedContentEnvelope = (options: CreateUntrustedContentEn
     const promptInjectionSignals = options.detectPromptInjection === false
         ? []
         : detectPromptInjectionSignals(content, options.additionalPromptInjectionPatterns);
+    const metadata = cloneMetadata(options.metadata);
 
     return Object.freeze({
         id: id || createEnvelopeId(source, label, content),
@@ -270,7 +273,7 @@ export const createUntrustedContentEnvelope = (options: CreateUntrustedContentEn
         label,
         content,
         contentType,
-        ...(options.metadata ? { metadata: cloneMetadata(options.metadata) } : {}),
+        ...(metadata ? { metadata } : {}),
         promptInjectionSignals: Object.freeze(promptInjectionSignals.map((signal) => Object.freeze({ ...signal }))),
     });
 };
@@ -349,7 +352,7 @@ const normalizeRenderableEnvelope = (envelope: UntrustedContentEnvelope | unknow
     const label = normalizeEnvelopeString(candidate.label, "Untrusted content");
     const content = stringifyContent(candidate.content);
     const id = normalizeEnvelopeString(candidate.id, "") || createEnvelopeId(source, label, content);
-    const metadata = candidate.metadata && typeof candidate.metadata === "object" ? cloneMetadata(candidate.metadata) : undefined;
+    const metadata = cloneMetadata(candidate.metadata);
     const promptInjectionSignals = Array.isArray(candidate.promptInjectionSignals) ? candidate.promptInjectionSignals : [];
 
     return Object.freeze({

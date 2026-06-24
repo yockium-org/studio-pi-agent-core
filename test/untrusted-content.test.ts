@@ -196,6 +196,43 @@ test("createUntrustedContentEnvelope preserves JSON-friendly special metadata va
     assert.match(rendered.text, /"topic": "breathwork"/u);
 });
 
+test("createUntrustedContentEnvelope normalizes runtime metadata roots", () => {
+    const mapEnvelope = createUntrustedContentEnvelope({
+        source: "tool",
+        label: "Map metadata",
+        content: "body",
+        metadata: new Map<unknown, unknown>([
+            ["token", "map-secret"],
+            ["tags", new Set(["breathing"])],
+        ]),
+    });
+    const primitiveEnvelope = createUntrustedContentEnvelope({
+        source: "tool",
+        label: "Primitive metadata",
+        content: "body",
+        metadata: "password=primitive-secret",
+    });
+    const runtimeRendered = renderUntrustedContentForModel({
+        id: "runtime-metadata-root",
+        source: "tool",
+        label: "Runtime metadata root",
+        content: "body",
+        contentType: "text",
+        metadata: "token=runtime-secret",
+        promptInjectionSignals: [],
+    });
+
+    const mapRendered = renderUntrustedContentForModel(mapEnvelope);
+    const primitiveRendered = renderUntrustedContentForModel(primitiveEnvelope);
+
+    assert.match(mapRendered.text, /"token": "\[REDACTED\]"/u);
+    assert.match(mapRendered.text, /"breathing"/u);
+    assert.match(primitiveRendered.text, /"value": "password=\[REDACTED\]"/u);
+    assert.match(runtimeRendered.text, /"value": "token=\[REDACTED\]"/u);
+    assert.equal(primitiveRendered.redacted, true);
+    assert.equal(runtimeRendered.redacted, true);
+});
+
 test("createUntrustedContentEnvelope snapshots and freezes nested metadata", () => {
     const tags = ["breathing"];
     const nested = { author: "Ana", tags };
