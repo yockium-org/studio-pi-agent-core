@@ -2,6 +2,8 @@
 
 `@studio/pi-agent-core` includes default advisory specialist cards for common editorial work. These presets do not run subagents by themselves; they are metadata and routing hints for a project-owned `SpecialistRunner`.
 
+For phase-aware writing/review flows that use these presets before, during, and after drafting, see `docs/editorial-workflow.md`.
+
 ## Included helpers
 
 | ID | Purpose | Suggested pi skill |

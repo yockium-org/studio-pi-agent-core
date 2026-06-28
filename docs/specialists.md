@@ -77,7 +77,7 @@ const result = await consultSpecialists(
 
 ## Editorial presets
 
-For common editorial work, core also exposes default advisory cards via `createEditorialSpecialistRegistry()` and `createEditorialSpecialistPolicy()`. See `docs/editorial-specialists.md` for the included content quality, GEO, entity, CMS structure, and safety reviewer presets.
+For common editorial work, core also exposes default advisory cards via `createEditorialSpecialistRegistry()` and `createEditorialSpecialistPolicy()`. See `docs/editorial-specialists.md` for the included content quality, GEO, entity, CMS structure, and safety reviewer presets, and `docs/editorial-workflow.md` for phase-aware writing/review flows.
 
 ## Pi tool wrapper
 

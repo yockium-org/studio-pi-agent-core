@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.5.1
+
+Fixes `buildEditorialMediaUploadPayload` so the returned MCP payload omits Telegram-only `filePath` metadata.
+
+## 0.5.0
+
+Adds reusable Telegram media helpers for editorial bots:
+
+- `extractTelegramImageAttachment` detects Telegram photo and image-document attachments;
+- `downloadTelegramImage` reuses the generic Telegram file downloader and returns Payload-friendly filename, MIME type, size, and base64 image bytes;
+- `buildEditorialMediaUploadPayload` combines downloaded image metadata with approved editorial fields before a project-specific curated MCP upload tool call;
+- tests lock image extraction, download conversion, and public API exports.
+
+## 0.4.0
+
+Adds phase-aware editorial workflow helpers and untrusted-content / prompt-injection guard helpers as one cohesive release:
+
+- `editorialWorkflowPhases` and `editorialWorkflowIntents` for shared workflow vocabulary;
+- `createEditorialWorkflowPlan` and `getEditorialWorkflowPhasePreset` for discover, plan, draft, review, polish, and prepare-mutation phase guidance;
+- `getEditorialWorkflowSpecialistIds` and `hasUnsafeEditorialWorkflowIntent` for phase specialist selection with safety-reviewer promotion on unsafe intent;
+- `createEditorialWorkflowConsultRequest`, `consultEditorialWorkflowPhase`, and `createConsultEditorialWorkflowPhaseTool` for project-owned runner integration;
+- `createEditorialWorkflowPolicy` for phase-aware helper caps while preserving hard-denied write/publish/delete/runtime capabilities;
+- `createUntrustedContentEnvelope` for marking CMS, Telegram, web, user, tool, and file content as data rather than instructions;
+- `renderUntrustedContentForModel` and `renderUntrustedContentListForModel` for model-facing quoted blocks with explicit safety rules;
+- `detectPromptInjectionSignals` and `promptInjectionSignalKinds` for common instruction-override, secret-exfiltration, tool-use, policy-bypass, and role-confusion signals;
+- `redactSensitiveText` for common token/API key/secret shapes before model rendering;
+- `createUntrustedContentResult` for Pi-compatible tool results that preserve guard metadata;
+- runtime hardening for invalid workflow phase/intent/helper inputs, invalid untrusted source/type/id/label values, malformed prompt-signal diagnostics, and missing/non-options-shaped envelope inputs;
+- safe stringification for cyclic, BigInt, Date, URL, RegExp, Set, Map, primitive metadata roots, and prototype-like metadata keys without mutating object prototypes;
+- bounded repeated prompt-injection diagnostics with redacted single-line matches and stateless RegExp handling;
+- packed-package smoke coverage for runtime imports and TypeScript declarations of the new workflow/guard APIs;
+- `docs/editorial-workflow.md` with the intended writing/review/prepare flow;
+- `docs/untrusted-content.md` with integration guidance for CMS reads, specialists, and future prepare/apply flows.
+
 ## 0.2.0
 
 Adds advisory specialist-helper orchestration:

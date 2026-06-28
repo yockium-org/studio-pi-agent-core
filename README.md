@@ -16,14 +16,19 @@ This package intentionally starts small. It contains project-neutral utilities t
 - `escapeTelegramHtmlText` / `sanitizeTelegramCodeTags` / `chunkTelegramMessage` — Telegram-safe response formatting helpers.
 - `listStoredPiSessions` / `formatPiSessionList` — reusable Pi session listing helpers.
 - `extractTelegramAudioAttachment` / `downloadTelegramFile` / `transcribeTelegramAudio` / `buildTelegramAudioTranscriptPrompt` — provider-agnostic Telegram audio transcription pipeline helpers. Projects inject the concrete `AudioTranscriber` provider.
+- `extractTelegramImageAttachment` / `downloadTelegramImage` / `buildEditorialMediaUploadPayload` — reusable Telegram image download helpers for project-specific curated media upload tools.
 - `defineSpecialistSkill` / `createSpecialistRegistry` / `routeSpecialists` / `consultSpecialists` / `createConsultSpecialistsTool` — advisory specialist-helper orchestration with policy-gated capabilities, router contracts, and helper self-accept/decline decisions.
 - `createEditorialSpecialistSkills` / `createEditorialSpecialistRegistry` / `createEditorialSpecialistRouter` / `createEditorialSpecialistPolicy` — default advisory editorial helper cards for content quality, GEO, entity clarity, CMS structure, and safety review.
+- `createEditorialWorkflowPlan` / `getEditorialWorkflowPhasePreset` / `getEditorialWorkflowSpecialistIds` / `createEditorialWorkflowConsultRequest` / `consultEditorialWorkflowPhase` / `createConsultEditorialWorkflowPhaseTool` — phase-aware editorial workflow helpers for discover, plan, draft, review, polish, and prepare-mutation flows.
+- `createEditorialWorkflowPolicy` / `hasUnsafeEditorialWorkflowIntent` / `editorialWorkflowPhases` / `editorialWorkflowIntents` — shared workflow policy, routing, and vocabulary helpers.
+- `createUntrustedContentEnvelope` / `renderUntrustedContentForModel` / `renderUntrustedContentListForModel` / `createUntrustedContentResult` — prompt-injection-aware wrappers for CMS, Telegram, web, user, tool, and file content that must be treated as data rather than instructions.
+- `detectPromptInjectionSignals` / `redactSensitiveText` / `promptInjectionSignalKinds` / `untrustedContentSources` / `untrustedContentTypes` — reusable signal detection, redaction, and source/type/kind vocabulary for project adapters.
 
 ## Adapter boundary
 
-Shared core owns mechanics: tool registration wrapper, schema guard invocation, active toolset state, generic MCP transport, safe Pi RPC argument/text helpers, Telegram formatting/audio helpers, and session-index helpers.
+Shared core owns mechanics: tool registration wrapper, schema guard invocation, active toolset state, generic MCP transport, safe Pi RPC argument/text helpers, Telegram formatting/audio/media helpers, session-index helpers, specialist workflow helpers, and untrusted-content rendering helpers.
 
-Project adapters own content policy: system prompt, Telegram help/image wording, CMS tool names and descriptions, TypeBox schemas, route and locale rules, block contracts, draft mapping, and concrete specialist runner implementation.
+Project adapters own content policy: system prompt, Telegram help/image wording, CMS tool names and descriptions, TypeBox schemas, route and locale rules, block contracts, draft mapping, concrete specialist runner implementation, and where untrusted content wrappers are applied.
 
 ## Specialist helpers
 
@@ -56,7 +61,7 @@ const result = await consultSpecialists(
 );
 ```
 
-See `docs/specialists.md` for the intended integration model and safety constraints, and `docs/editorial-specialists.md` for the default editorial helper cards.
+See `docs/specialists.md` for the intended integration model and safety constraints, `docs/editorial-specialists.md` for the default editorial helper cards, `docs/editorial-workflow.md` for phase-aware writing/review flows, and `docs/untrusted-content.md` for prompt-injection boundary helpers.
 
 ## Validation
 
