@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.1
+
+Fixes `buildEditorialMediaUploadPayload` so the returned MCP payload omits Telegram-only `filePath` metadata.
+
 ## 0.5.0
 
 Adds reusable Telegram media helpers for editorial bots:

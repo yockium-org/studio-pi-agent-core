@@ -28,7 +28,7 @@ export type DownloadedTelegramImage = {
     size: number;
 };
 
-export type EditorialMediaUploadPayload = DownloadedTelegramImage & {
+export type EditorialMediaUploadPayload = Omit<DownloadedTelegramImage, "filePath"> & {
     alt: string;
     approvalSummary?: string;
     credits?: string;
@@ -144,7 +144,10 @@ export const buildEditorialMediaUploadPayload = ({
     title,
     usageSuggestion,
 }: BuildEditorialMediaUploadPayloadOptions): EditorialMediaUploadPayload => ({
-    ...image,
+    filename: image.filename,
+    imageBase64: image.imageBase64,
+    mimeType: image.mimeType,
+    size: image.size,
     alt,
     ...(approvalSummary ? { approvalSummary } : {}),
     ...(credits ? { credits } : {}),
