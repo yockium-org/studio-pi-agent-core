@@ -5,6 +5,7 @@ import test from "node:test";
 import * as core from "../src/index.js";
 
 const expectedFunctionExports = [
+    "buildEditorialMediaUploadPayload",
     "buildTelegramAudioTranscriptPrompt",
     "callPayloadMcpTool",
     "chunkTelegramMessage",
@@ -32,9 +33,11 @@ const expectedFunctionExports = [
     "defineSpecialistSkill",
     "detectPromptInjectionSignals",
     "downloadTelegramFile",
+    "downloadTelegramImage",
     "escapeTelegramHtmlText",
     "extractPiMessageText",
     "extractTelegramAudioAttachment",
+    "extractTelegramImageAttachment",
     "formatPiSessionList",
     "getEditorialSpecialistPrompt",
     "getEditorialWorkflowPhasePreset",

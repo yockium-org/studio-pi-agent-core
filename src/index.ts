@@ -58,6 +58,17 @@ export {
     type TranscribeTelegramAudioOptions,
 } from "./telegram/audio.js";
 export {
+    buildEditorialMediaUploadPayload,
+    downloadTelegramImage,
+    extractTelegramImageAttachment,
+    type BuildEditorialMediaUploadPayloadOptions,
+    type DownloadedTelegramImage,
+    type DownloadTelegramImageOptions,
+    type EditorialMediaUploadPayload,
+    type TelegramImageAttachment,
+    type TelegramImageAttachmentKind,
+} from "./telegram/media.js";
+export {
     formatPiSessionList,
     getPiSessionName,
     listStoredPiSessions,

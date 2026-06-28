@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0
+
+Adds reusable Telegram media helpers for editorial bots:
+
+- `extractTelegramImageAttachment` detects Telegram photo and image-document attachments;
+- `downloadTelegramImage` reuses the generic Telegram file downloader and returns Payload-friendly filename, MIME type, size, and base64 image bytes;
+- `buildEditorialMediaUploadPayload` combines downloaded image metadata with approved editorial fields before a project-specific curated MCP upload tool call;
+- tests lock image extraction, download conversion, and public API exports.
+
 ## 0.4.0
 
 Adds phase-aware editorial workflow helpers and untrusted-content / prompt-injection guard helpers as one cohesive release:
